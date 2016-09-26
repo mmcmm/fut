@@ -198,29 +198,25 @@ namespace EvFutBot.Models
                                     await Task.Delay(settings.RmpDelayLow);
                                     await _utClient.QuickSellItemAsync(boughtAction.ItemData.Id);
                                 }
-                                catch (Exception ex)
+                                catch (PermissionDeniedException ex)
                                 {
                                     try
                                     {
-                                        await Task.Delay(settings.RmpDelayLow);
-                                        var ranges =
-                                            await
-                                                _utClient.GetPriceRangesAsync(new List<long> {boughtAction.ItemData.Id});
-                                        if (ranges.Count != 0)
-                                        {
-                                            auctionDetails = new AuctionDetails(boughtAction.ItemData.Id,
-                                                GetAuctionDuration(startedAt, settings.RunforHours, Login),
-                                                ranges[0].MinPrice, ranges[0].MaxPrice);
-
-                                            await Task.Delay(settings.RmpDelay);
-                                            await _utClient.ListAuctionAsync(auctionDetails);
-                                        }
+                                        await Task.Delay(settings.RmpDelay);
+                                        await _utClient.ListAuctionAsync(new AuctionDetails(boughtAction.ItemData.Id,
+                                            GetAuctionDuration(startedAt, settings.RunforHours, Login), 
+                                            boughtAction.ItemData.MarketDataMinPrice, boughtAction.ItemData.MarketDataMaxPrice));
                                     }
                                     catch (Exception)
                                     {
                                         // ignored
                                     }
 
+                                    await HandleException(ex, settings.SecurityDelay, Email);
+                                    return true;
+                                }
+                                catch (Exception ex)
+                                {
                                     await HandleException(ex, settings.SecurityDelay, Email);
                                     return true;
                                 }

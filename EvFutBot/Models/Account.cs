@@ -614,8 +614,8 @@ namespace EvFutBot.Models
 
             // clear any useless cards in the account that clog the tradepile
             foreach (var card in tradePileList.AuctionInfo.Where(
-                        card => (card.ItemData.ItemType == "player" && card.ItemData.Rating <= 70)
-                                || card.ItemData.ItemType != "player"))
+                card => (card.ItemData.ItemType == "player" && card.ItemData.Rating <= 70)
+                        || card.ItemData.ItemType != "player"))
             {
                 try
                 {
@@ -667,8 +667,8 @@ namespace EvFutBot.Models
 
                     await Task.Delay(settings.RmpDelay);
                     await _utClient.ListAuctionAsync(new AuctionDetails(expiredCard.ItemData.Id,
-                            GetAuctionDuration(startedAt, settings.RunforHours, Login),
-                            CalculateBidPrice(sellPrice, settings.SellPercent), sellPrice));
+                        GetAuctionDuration(startedAt, settings.RunforHours, Login),
+                        CalculateBidPrice(sellPrice, settings.SellPercent), sellPrice));
                 }
                 catch (ExpiredSessionException ex)
                 {
@@ -705,39 +705,17 @@ namespace EvFutBot.Models
             // list won bids
             foreach (var wonBidCard in tradePileList.AuctionInfo.Where(g => g.TradeState == null))
             {
-                uint sellPrice = 0;
                 try
                 {
-                    sellPrice = GetWonBidPrice(wonBidCard.ItemData.AssetId, wonBidCard.ItemData.LastSalePrice,
+                    var sellPrice = GetWonBidPrice(wonBidCard.ItemData.AssetId, wonBidCard.ItemData.LastSalePrice,
                         wonBidCard.ItemData.Rating, settings.SellPercent);
                     await Task.Delay(settings.RmpDelay);
-                    await
-                        _utClient.ListAuctionAsync(new AuctionDetails(wonBidCard.ItemData.Id,
-                            GetAuctionDuration(startedAt, settings.RunforHours, Login),
-                            CalculateBidPrice(sellPrice, settings.SellPercent), sellPrice));
+                    await _utClient.ListAuctionAsync(new AuctionDetails(wonBidCard.ItemData.Id,
+                        GetAuctionDuration(startedAt, settings.RunforHours, Login),
+                        CalculateBidPrice(sellPrice, settings.SellPercent), sellPrice));
                 }
                 catch (PermissionDeniedException ex)
-                {
-                    try
-                    {
-                        await Task.Delay(settings.RmpDelay);
-                        var ranges =
-                            await _utClient.GetPriceRangesAsync(new List<long> {wonBidCard.ItemData.Id});
-                        if (ranges.Count != 0 && (sellPrice >= ranges[0].MaxPrice || sellPrice <= ranges[0].MinPrice))
-                        {
-                            await Task.Delay(settings.RmpDelay);
-                            await
-                                _utClient.ListAuctionAsync(new AuctionDetails(wonBidCard.ItemData.Id,
-                                    GetAuctionDuration(startedAt, settings.RunforHours, Login),
-                                    AuctionInfo.CalculateNextBid(ranges[0].MinPrice),
-                                    AuctionInfo.CalculatePreviousBid(ranges[0].MaxPrice)));
-                        }
-                    }
-                    catch (Exception)
-                    {
-                        // ignored
-                    }
-
+                {              
                     HandleException(ex, settings.SecurityDelay, Email, true);
                     break;
                 }

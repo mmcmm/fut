@@ -81,19 +81,19 @@ namespace UltimateTeam.Toolkit.Models
 
         public string Category { get; set; }
 
-        public int MarketDataMaxPrice { get; set; }
+        public uint MarketDataMaxPrice { get; set; }
 
-        public int MarketDataMinPrice { get; set; }
+        public uint MarketDataMinPrice { get; set; }
 
-        public int Weightrare { get; set; }
+        public uint Weightrare { get; set; }
 
-        public int Bronze { get; set; }
+        public uint Bronze { get; set; }
 
-        public int Silver { get; set; }
+        public uint Silver { get; set; }
 
-        public int Gold { get; set; }
+        public uint Gold { get; set; }
 
-        public int Cardassetid { get; set; }
+        public uint Cardassetid { get; set; }
 
         public string Description { get; set; }
 
@@ -101,12 +101,12 @@ namespace UltimateTeam.Toolkit.Models
 
         public string Biodescription { get; set; }
 
-        public int Amount { get; set; }
+        public uint Amount { get; set; }
 
         public string FirstName { get; set; }
 
         public string LastName { get; set; }
 
-        public int Attribute { get; set; }
+        public uint Attribute { get; set; }
     }
 }
