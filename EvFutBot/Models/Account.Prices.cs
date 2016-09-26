@@ -20,10 +20,10 @@ namespace EvFutBot.Models
         {
             return Task.Run(async () =>
             {
-                DateTime startedAt = Convert.ToDateTime(panel.StartedAt);
+                var startedAt = Convert.ToDateTime(panel.StartedAt);
                 await ClearGiftList(settings);
-                bool reverse = _id > 4; // we get players in reverse
-                List<Player> players = GetPlatformPlayers(Platform, reverse);
+                var reverse = _id > 4; // we get players in reverse
+                var players = GetPlatformPlayers(Platform, reverse);
 
                 while (true) // main loop
                 {
@@ -104,11 +104,11 @@ namespace EvFutBot.Models
 
         public async Task<bool> SearchAndPrice(Player player, Settings settings)
         {
-            uint maxPrice = GetEaPrice(player.GetStdPrice(Platform), 100);
-            uint lowestBinAvg = uint.MaxValue;
+            var maxPrice = GetEaPrice(player.GetStdPrice(Platform), 100);
+            var lowestBinAvg = uint.MaxValue;
 
             AuctionResponse searchResponse;
-            PlayerSearchParameters searchParameters = new PlayerSearchParameters
+            var searchParameters = new PlayerSearchParameters
             {
                 Page = 1,
                 ResourceId = player.AssetId,
@@ -161,7 +161,7 @@ namespace EvFutBot.Models
             }
 
             searchResponse.AuctionInfo.Sort((x, y) => Convert.ToInt32(x.BuyNowPrice) - Convert.ToInt32(y.BuyNowPrice));
-            for (int i = 0; i < settings.LowestBinNr; i++)
+            for (var i = 0; i < settings.LowestBinNr; i++)
             {
                 lowestBinAvg += searchResponse.AuctionInfo[i].BuyNowPrice;
             }
@@ -223,8 +223,8 @@ namespace EvFutBot.Models
 
         public static uint GetEaPrice(uint price, byte percent)
         {
-            uint maxBuy = price*percent/100;
-            double roundTo = 50.0;
+            var maxBuy = price*percent/100;
+            var roundTo = 50.0;
             if (maxBuy >= 1000) roundTo = 100.0;
             if (maxBuy >= 10000) roundTo = 250.0;
             if (maxBuy >= 50000) roundTo = 500.0;
@@ -236,8 +236,8 @@ namespace EvFutBot.Models
         public static uint GetMaxCardCost(uint credits, byte maxCardCostPercent)
         {
             if (credits <= SmallAccount) maxCardCostPercent = 100; // exception for small accounts
-            uint playerCost = credits*maxCardCostPercent/100;
-            uint minCardCost = GetEaPrice(SmallAccount, maxCardCostPercent);
+            var playerCost = credits*maxCardCostPercent/100;
+            var minCardCost = GetEaPrice(SmallAccount, maxCardCostPercent);
 
             return playerCost < minCardCost ? minCardCost : playerCost;
         }
@@ -247,7 +247,7 @@ namespace EvFutBot.Models
             // for player contracts
             if (lastSalePrice == 150) return 250;
 
-            uint playerPrice = GetPlayerPrice(assetId, rating, Platform);
+            var playerPrice = GetPlayerPrice(assetId, rating, Platform);
             return playerPrice > 0
                 ? GetEaPrice(playerPrice, sellPercent)
                 : GetEaPrice(lastSalePrice, Convert.ToByte(sellPercent + 25));
@@ -309,7 +309,7 @@ namespace EvFutBot.Models
         public static AuctionDuration GetAuctionDuration(DateTime startedAt, int shouldRunFor,
             AppVersion login)
         {
-            TimeSpan span = DateTime.Now.Subtract(startedAt);
+            var span = DateTime.Now.Subtract(startedAt);
             return Math.Abs(span.Hours) >= shouldRunFor - 2
                 ? (login == AppVersion.CompanionApp ? AuctionDuration.SixHours : AuctionDuration.OneHour)
                 : AuctionDuration.OneHour;
@@ -326,7 +326,7 @@ namespace EvFutBot.Models
 
             percent -= less;
             bidprice = GetEaPrice(binprice, percent);
-            uint prevBidPrice = AuctionInfo.CalculatePreviousBid(binprice);
+            var prevBidPrice = AuctionInfo.CalculatePreviousBid(binprice);
             prevBidPrice = prevBidPrice == 0 ? 150 : prevBidPrice;
 
             return bidprice == binprice ? prevBidPrice : bidprice;
@@ -334,14 +334,14 @@ namespace EvFutBot.Models
 
         public static uint CalculateMinPrice(uint maxPrice)
         {
-            Random rand = new Random();
-            int minPrice = rand.Next(200, Convert.ToInt32(maxPrice/2));
+            var rand = new Random();
+            var minPrice = rand.Next(200, Convert.ToInt32(maxPrice/2));
             return Convert.ToUInt32(minPrice);
         }
 
         public static byte CalculatePercent(uint maxPrice, bool bid, Settings settings)
         {
-            byte percent = bid ? settings.BidPercent : settings.BinPercent;
+            var percent = bid ? settings.BidPercent : settings.BinPercent;
             if (maxPrice >= 2600) percent += 5;
 
             return percent;

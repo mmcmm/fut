@@ -33,14 +33,14 @@ namespace EvFutBot.Services
         {
             return Task.Run(async () =>
             {
-                using (ImapClient client = new ImapClient(_hostName, _username, _password, AuthMethods.Login, Port,
+                using (var client = new ImapClient(_hostName, _username, _password, AuthMethods.Login, Port,
                     UseSsl))
                 {
-                    Random rand = new Random();
-                    int randDelay = rand.Next(45, 60);
+                    var rand = new Random();
+                    var randDelay = rand.Next(45, 60);
                     await Task.Delay(randDelay*1000); // wait 45-60s  
 
-                    int count = client.GetMessageCount();
+                    var count = client.GetMessageCount();
                     int offset;
                     switch (_hostName)
                     {
@@ -53,8 +53,8 @@ namespace EvFutBot.Services
                             break;
                     }
 
-                    MailMessage[] mm = client.GetMessages(offset, count);
-                    string code = GetEaCode(mm);
+                    var mm = client.GetMessages(offset, count);
+                    var code = GetEaCode(mm);
                     if (code.Length == 0)
                     {
                         // we get bodyes too if not found in subject
@@ -70,13 +70,13 @@ namespace EvFutBot.Services
 
         private string GetEaCode(MailMessage[] mm, string regex = @"\d{6}")
         {
-            string code = string.Empty;
+            var code = string.Empty;
             Array.Reverse(mm);
-            foreach (MailMessage message in
+            foreach (var message in
                 mm.Where(m => m.From.Address == "EA@e.ea.com" && m.To.First().Address == _email &&
                               !m.Flags.HasFlag(Flags.Seen)))
             {
-                string searchIn = message.Body ?? message.Subject;
+                var searchIn = message.Body ?? message.Subject;
                 code = Regex.Match(searchIn, regex).Value; // we base our regex on a six digits code
                 if (message.Body != null) code = Regex.Match(code, regex).Value; // we clear the > <
 

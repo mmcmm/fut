@@ -20,7 +20,7 @@ namespace EvFutBot.Utilities
             {
                 try
                 {
-                    BinaryFormatter formatter = new BinaryFormatter();
+                    var formatter = new BinaryFormatter();
                     formatter.Serialize(stream, c);
                 }
                 catch (Exception ex)
@@ -36,7 +36,7 @@ namespace EvFutBot.Utilities
             {
                 using (Stream stream = File.Open(file, FileMode.Open))
                 {
-                    BinaryFormatter formatter = new BinaryFormatter();
+                    var formatter = new BinaryFormatter();
                     return (CookieContainer) formatter.Deserialize(stream);
                 }
             }

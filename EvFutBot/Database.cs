@@ -35,8 +35,8 @@ namespace EvFutBot
 
         public static List<Account> GetAccounts(byte max, AppVersion login)
         {
-            using (MySqlConnection connection = new MySqlConnection(Cs.GetConnectionString(true)))
-            using (MySqlCommand cmd = connection.CreateCommand())
+            using (var connection = new MySqlConnection(Cs.GetConnectionString(true)))
+            using (var cmd = connection.CreateCommand())
             {
                 connection.Open();
 
@@ -52,8 +52,8 @@ namespace EvFutBot
 
         public static Settings GetSettings()
         {
-            using (MySqlConnection connection = new MySqlConnection(Cs.GetConnectionString(true)))
-            using (MySqlCommand cmd = connection.CreateCommand())
+            using (var connection = new MySqlConnection(Cs.GetConnectionString(true)))
+            using (var cmd = connection.CreateCommand())
             {
                 connection.Open();
 
@@ -66,8 +66,8 @@ namespace EvFutBot
 
         public static List<OrderCard> GetCustomerCards(Platform platform, string email, uint credits)
         {
-            using (MySqlConnection connection = new MySqlConnection(Cs.GetConnectionString(true)))
-            using (MySqlCommand cmd = connection.CreateCommand())
+            using (var connection = new MySqlConnection(Cs.GetConnectionString(true)))
+            using (var cmd = connection.CreateCommand())
             {
                 connection.Open();
 
@@ -100,12 +100,12 @@ namespace EvFutBot
 
         public static List<Player> GetPlayers(byte max, uint maxPrice, Platform platform)
         {
-            using (MySqlConnection connection = new MySqlConnection(Cs.GetConnectionString(true)))
-            using (MySqlCommand cmd = connection.CreateCommand())
+            using (var connection = new MySqlConnection(Cs.GetConnectionString(true)))
+            using (var cmd = connection.CreateCommand())
             {
                 connection.Open();
                 // we overwrite old gen
-                Platform platformList = platform;
+                var platformList = platform;
                 switch (platformList)
                 {
                     case Platform.Ps3:
@@ -120,14 +120,14 @@ namespace EvFutBot
                                   $"AND std_price{platform}>0 AND (platform='{platformList}' OR platform='All') LIMIT 0, 2000";
 
                 IDataReader reader = cmd.ExecuteReader();
-                List<uint> assetIds = new List<uint>();
+                var assetIds = new List<uint>();
 
                 while (reader.Read())
                 {
                     assetIds.Add(Convert.ToUInt32(reader["asset_id"]));
                 }
                 reader.Close();
-                uint[] randAssetIds = GetRandAssetIds(assetIds, max);
+                var randAssetIds = GetRandAssetIds(assetIds, max);
 
                 // new we get the players
                 if (randAssetIds.Length == 0) return new List<Player>();
@@ -141,8 +141,8 @@ namespace EvFutBot
         public static void LogTransaction(string account, uint buyNowPrice, int rating, long assetId, int tradePileCount,
             string type, string server, Platform platform)
         {
-            using (MySqlConnection connection = new MySqlConnection(Cs.GetConnectionString(true)))
-            using (MySqlCommand cmd = connection.CreateCommand())
+            using (var connection = new MySqlConnection(Cs.GetConnectionString(true)))
+            using (var cmd = connection.CreateCommand())
             {
                 connection.Open();
 
@@ -164,12 +164,12 @@ namespace EvFutBot
 
         public static List<Player> GetPlatformPlayers(Platform platform, bool reverse)
         {
-            using (MySqlConnection connection = new MySqlConnection(Cs.GetConnectionString(true)))
-            using (MySqlCommand cmd = connection.CreateCommand())
+            using (var connection = new MySqlConnection(Cs.GetConnectionString(true)))
+            using (var cmd = connection.CreateCommand())
             {
                 connection.Open();
                 // we overwrite old gen
-                Platform platformList = platform;
+                var platformList = platform;
                 switch (platformList)
                 {
                     case Platform.Ps3:
@@ -180,7 +180,7 @@ namespace EvFutBot
                         break;
                 }
 
-                string ordering = reverse ? "DESC" : "ASC";
+                var ordering = reverse ? "DESC" : "ASC";
                 cmd.CommandText = $"SELECT * FROM players WHERE platform='{platformList}' OR platform='All' " +
                                   $"ORDER BY asset_id {ordering} LIMIT 0, 2000";
                 IDataReader reader = cmd.ExecuteReader();
@@ -190,8 +190,8 @@ namespace EvFutBot
 
         public static List<Player> GetAllPlayers()
         {
-            using (MySqlConnection connection = new MySqlConnection(Cs.GetConnectionString(true)))
-            using (MySqlCommand cmd = connection.CreateCommand())
+            using (var connection = new MySqlConnection(Cs.GetConnectionString(true)))
+            using (var cmd = connection.CreateCommand())
             {
                 connection.Open();
 
@@ -203,8 +203,8 @@ namespace EvFutBot
 
         public static List<Player> GetAllCardWeightPlayers()
         {
-            using (MySqlConnection connection = new MySqlConnection(Cs.GetConnectionString(true)))
-            using (MySqlCommand cmd = connection.CreateCommand())
+            using (var connection = new MySqlConnection(Cs.GetConnectionString(true)))
+            using (var cmd = connection.CreateCommand())
             {
                 connection.Open();
 
@@ -216,8 +216,8 @@ namespace EvFutBot
 
         public static uint GetPlayerPrice(long assetId, int rating, string platform)
         {
-            using (MySqlConnection connection = new MySqlConnection(Cs.GetConnectionString(true)))
-            using (MySqlCommand cmd = connection.CreateCommand())
+            using (var connection = new MySqlConnection(Cs.GetConnectionString(true)))
+            using (var cmd = connection.CreateCommand())
             {
                 connection.Open();
 
@@ -240,8 +240,8 @@ namespace EvFutBot
 
         public static uint GetPlatformStock(Platform platform)
         {
-            using (MySqlConnection connection = new MySqlConnection(Cs.GetConnectionString(true)))
-            using (MySqlCommand cmd = connection.CreateCommand())
+            using (var connection = new MySqlConnection(Cs.GetConnectionString(true)))
+            using (var cmd = connection.CreateCommand())
             {
                 connection.Open();
 
@@ -264,8 +264,8 @@ namespace EvFutBot
 
         public static uint GetBinStock(Platform platform)
         {
-            using (MySqlConnection connection = new MySqlConnection(Cs.GetConnectionString(true)))
-            using (MySqlCommand cmd = connection.CreateCommand())
+            using (var connection = new MySqlConnection(Cs.GetConnectionString(true)))
+            using (var cmd = connection.CreateCommand())
             {
                 connection.Open();
 
@@ -286,8 +286,8 @@ namespace EvFutBot
 
         public static uint GetAvgAccountStock(Platform platform, double average)
         {
-            using (MySqlConnection connection = new MySqlConnection(Cs.GetConnectionString(true)))
-            using (MySqlCommand cmd = connection.CreateCommand())
+            using (var connection = new MySqlConnection(Cs.GetConnectionString(true)))
+            using (var cmd = connection.CreateCommand())
             {
                 connection.Open();
 
@@ -310,8 +310,8 @@ namespace EvFutBot
 
         public static bool ShouldAddCards(Platform platform)
         {
-            using (MySqlConnection connection = new MySqlConnection(Cs.GetConnectionString(true)))
-            using (MySqlCommand cmd = connection.CreateCommand())
+            using (var connection = new MySqlConnection(Cs.GetConnectionString(true)))
+            using (var cmd = connection.CreateCommand())
             {
                 connection.Open();
 
@@ -321,7 +321,7 @@ namespace EvFutBot
 
                 IDataReader reader = cmd.ExecuteReader();
 
-                string status = string.Empty;
+                var status = string.Empty;
                 while (reader.Read())
                 {
                     status = (string) reader["status"];
@@ -333,8 +333,8 @@ namespace EvFutBot
 
         public static void AddCard(Platform platform, OrderCard card, Account.CardStatuses status, uint item)
         {
-            using (MySqlConnection connection = new MySqlConnection(Cs.GetConnectionString(true)))
-            using (MySqlCommand cmd = connection.CreateCommand())
+            using (var connection = new MySqlConnection(Cs.GetConnectionString(true)))
+            using (var cmd = connection.CreateCommand())
             {
                 connection.Open();
 
@@ -356,13 +356,13 @@ namespace EvFutBot
 
         private static uint[] GetRandAssetIds(List<uint> allAssetIds, byte max)
         {
-            Random rand = new Random();
+            var rand = new Random();
             max = max > allAssetIds.Count ? Convert.ToByte(allAssetIds.Count) : max;
-            uint[] randAssetIds = new uint[max];
+            var randAssetIds = new uint[max];
 
-            for (int i = 0; i < max; i++)
+            for (var i = 0; i < max; i++)
             {
-                int randI = rand.Next(0, allAssetIds.Count);
+                var randI = rand.Next(0, allAssetIds.Count);
                 randAssetIds[i] = allAssetIds[randI];
                 allAssetIds.RemoveAt(randI);
             }
@@ -373,8 +373,8 @@ namespace EvFutBot
         public static void SaveToPanel(string account, string server, Panel.Statuses status, string startedAt,
             uint credits, AppVersion login, Platform platform)
         {
-            using (MySqlConnection connection = new MySqlConnection(Cs.GetConnectionString(true)))
-            using (MySqlCommand cmd = connection.CreateCommand())
+            using (var connection = new MySqlConnection(Cs.GetConnectionString(true)))
+            using (var cmd = connection.CreateCommand())
             {
                 connection.Open();
 
@@ -396,8 +396,8 @@ namespace EvFutBot
 
         public static void SavePlayerPrice(uint assetId, uint price, string platform)
         {
-            using (MySqlConnection connection = new MySqlConnection(Cs.GetConnectionString(true)))
-            using (MySqlCommand cmd = connection.CreateCommand())
+            using (var connection = new MySqlConnection(Cs.GetConnectionString(true)))
+            using (var cmd = connection.CreateCommand())
             {
                 connection.Open();
 
@@ -411,8 +411,8 @@ namespace EvFutBot
 
         public static void MarkErrorCard(Platform platform, string email, string message)
         {
-            using (MySqlConnection connection = new MySqlConnection(Cs.GetConnectionString(true)))
-            using (MySqlCommand cmd = connection.CreateCommand())
+            using (var connection = new MySqlConnection(Cs.GetConnectionString(true)))
+            using (var cmd = connection.CreateCommand())
             {
                 connection.Open();
 
@@ -432,8 +432,8 @@ namespace EvFutBot
 
         public static void MarkResetCard(Platform platform, string email, long tradeId)
         {
-            using (MySqlConnection connection = new MySqlConnection(Cs.GetConnectionString(true)))
-            using (MySqlCommand cmd = connection.CreateCommand())
+            using (var connection = new MySqlConnection(Cs.GetConnectionString(true)))
+            using (var cmd = connection.CreateCommand())
             {
                 connection.Open();
 
@@ -456,8 +456,8 @@ namespace EvFutBot
 
         public static void MarkBoughtCard(Platform platform, string email, long tradeId)
         {
-            using (MySqlConnection connection = new MySqlConnection(Cs.GetConnectionString(true)))
-            using (MySqlCommand cmd = connection.CreateCommand())
+            using (var connection = new MySqlConnection(Cs.GetConnectionString(true)))
+            using (var cmd = connection.CreateCommand())
             {
                 connection.Open();
 
@@ -479,8 +479,8 @@ namespace EvFutBot
 
         public static void SavePlayerCardWeight(uint assetId, int weight, string platform)
         {
-            using (MySqlConnection connection = new MySqlConnection(Cs.GetConnectionString(true)))
-            using (MySqlCommand cmd = connection.CreateCommand())
+            using (var connection = new MySqlConnection(Cs.GetConnectionString(true)))
+            using (var cmd = connection.CreateCommand())
             {
                 connection.Open();
 
@@ -495,8 +495,8 @@ namespace EvFutBot
 
         public static void SavePlayerPriceF(uint assetId, string platform1, string platform2, uint price1, uint price2)
         {
-            using (MySqlConnection connection = new MySqlConnection(Cs.GetConnectionString(true)))
-            using (MySqlCommand cmd = connection.CreateCommand())
+            using (var connection = new MySqlConnection(Cs.GetConnectionString(true)))
+            using (var cmd = connection.CreateCommand())
             {
                 connection.Open();
 
@@ -512,8 +512,8 @@ namespace EvFutBot
 
         public static void Log(string message, string account, string server, string details)
         {
-            using (MySqlConnection connection = new MySqlConnection(Cs.GetConnectionString(true)))
-            using (MySqlCommand cmd = connection.CreateCommand())
+            using (var connection = new MySqlConnection(Cs.GetConnectionString(true)))
+            using (var cmd = connection.CreateCommand())
             {
                 connection.Open();
 
@@ -530,8 +530,8 @@ namespace EvFutBot
 
         public static string GetAccountStartedAt(string account, string server, Panel.Statuses status)
         {
-            using (MySqlConnection connection = new MySqlConnection(Cs.GetConnectionString(true)))
-            using (MySqlCommand cmd = connection.CreateCommand())
+            using (var connection = new MySqlConnection(Cs.GetConnectionString(true)))
+            using (var cmd = connection.CreateCommand())
             {
                 connection.Open();
 
@@ -550,8 +550,8 @@ namespace EvFutBot
 
         public static void SaveBaseId(int baseId, uint assetId, int rating)
         {
-            using (MySqlConnection connection = new MySqlConnection(Cs.GetConnectionString(true)))
-            using (MySqlCommand cmd = connection.CreateCommand())
+            using (var connection = new MySqlConnection(Cs.GetConnectionString(true)))
+            using (var cmd = connection.CreateCommand())
             {
                 connection.Open();
 
@@ -567,8 +567,8 @@ namespace EvFutBot
         public static void SaveNewPlayer(int baseId, string assetId, int rating, string commonName,
             string firstName, string lastName, uint stdPriceXboxOne, string type)
         {
-            using (MySqlConnection connection = new MySqlConnection(Cs.GetConnectionString(true)))
-            using (MySqlCommand cmd = connection.CreateCommand())
+            using (var connection = new MySqlConnection(Cs.GetConnectionString(true)))
+            using (var cmd = connection.CreateCommand())
             {
                 connection.Open();
 
@@ -593,24 +593,24 @@ namespace EvFutBot
 
         public static void SavePlayerStatistics(Player player, Dictionary<string, long> stats, Platform platform)
         {
-            using (MySqlConnection connection = new MySqlConnection(Cs.GetConnectionString(true)))
-            using (MySqlCommand cmd = connection.CreateCommand())
+            using (var connection = new MySqlConnection(Cs.GetConnectionString(true)))
+            using (var cmd = connection.CreateCommand())
             {
                 connection.Open();
-                string profit = "p_l_" + platform.ToString().ToLower();
-                string intp = "tp_" + platform.ToString().ToLower();
+                var profit = "p_l_" + platform.ToString().ToLower();
+                var intp = "tp_" + platform.ToString().ToLower();
 
                 if (platform == Platform.Ps4) // ps4 is the first platfrom where inserts are made
                 {
-                    DateTime addedOn = Convert.ToDateTime(player.AddedOn);
-                    TimeSpan daysOn = DateTime.Now - addedOn;
+                    var addedOn = Convert.ToDateTime(player.AddedOn);
+                    var daysOn = DateTime.Now - addedOn;
                     cmd.CommandText =
                         "INSERT INTO player_statistics (name, rating, days_on, platform, asset_id, base_id) " +
                         "VALUES (@name, @rating, @days_on, @platform, @asset_id, @base_id) ";
 
                     cmd.Prepare();
 
-                    string name = player.CommonName.Length != 0
+                    var name = player.CommonName.Length != 0
                         ? player.CommonName
                         : player.FirstName + " " + player.LastName;
 
@@ -636,8 +636,8 @@ namespace EvFutBot
 
         public static void ClearPlayerStatistics()
         {
-            using (MySqlConnection connection = new MySqlConnection(Cs.GetConnectionString(true)))
-            using (MySqlCommand cmd = connection.CreateCommand())
+            using (var connection = new MySqlConnection(Cs.GetConnectionString(true)))
+            using (var cmd = connection.CreateCommand())
             {
                 connection.Open();
 
@@ -649,8 +649,8 @@ namespace EvFutBot
         public static Dictionary<string, long> GetPlayerStatistics(uint assetId, uint baseId, byte rating,
             Platform platform)
         {
-            using (MySqlConnection connection = new MySqlConnection(Cs.GetConnectionString(true)))
-            using (MySqlCommand cmd = connection.CreateCommand())
+            using (var connection = new MySqlConnection(Cs.GetConnectionString(true)))
+            using (var cmd = connection.CreateCommand())
             {
                 connection.Open();
 
@@ -742,8 +742,8 @@ namespace EvFutBot
                 reader.Close();
 
                 clossedSum = Convert.ToInt64(clossedSum*0.95); // ea tax
-                long profit = clossedSum - (wonbidSum + boughtSum);
-                long intradepiles = wonbidCount + boughtCount - clossedCount;
+                var profit = clossedSum - (wonbidSum + boughtSum);
+                var intradepiles = wonbidCount + boughtCount - clossedCount;
                 return new Dictionary<string, long>
                 {
                     {"tp", intradepiles},
@@ -754,7 +754,7 @@ namespace EvFutBot
 
         public static void SshConnect()
         {
-            ConnectionInfo ci = new ConnectionInfo(DbHost, SshUser,
+            var ci = new ConnectionInfo(DbHost, SshUser,
                 new PasswordAuthenticationMethod(SshUser, SshPassword));
             Tunnel = new SshTunnel(ci, 3306);
 

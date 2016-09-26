@@ -22,24 +22,24 @@ namespace EvFutBot.Models
         {
             return Task.Run(async () =>
             {
-                Demand demand = await CheckDemand();
+                var demand = await CheckDemand();
                 if (demand?.Ps3 != null)
-                    foreach (Order order in demand.Ps3)
+                    foreach (var order in demand.Ps3)
                     {
                         ProcessDemand(Platform.Ps3, order);
                     }
                 if (demand?.Ps4 != null)
-                    foreach (Order order in demand.Ps4)
+                    foreach (var order in demand.Ps4)
                     {
                         ProcessDemand(Platform.Ps4, order);
                     }
                 if (demand?.Xbox360 != null)
-                    foreach (Order order in demand.Xbox360)
+                    foreach (var order in demand.Xbox360)
                     {
                         ProcessDemand(Platform.Xbox360, order);
                     }
                 if (demand?.XboxOne != null)
-                    foreach (Order order in demand.XboxOne)
+                    foreach (var order in demand.XboxOne)
                     {
                         ProcessDemand(Platform.XboxOne, order);
                     }
@@ -53,8 +53,8 @@ namespace EvFutBot.Models
             if (ShouldAddCards(platform) == false) return; // no account works
             if (GetPlatformStock(platform) <= order.Amt) return; // we ballpark stock
 
-            IEnumerable<OrderCard> orderCards = await ReserveOrder(platform, order);
-            List<OrderCard> cards = orderCards?.OrderBy(card => card.Bin).ToList();
+            var orderCards = await ReserveOrder(platform, order);
+            var cards = orderCards?.OrderBy(card => card.Bin).ToList();
 
             if (cards == null || cards.Count == 0 || cards.Any(card => card.TradeId == 0))
             {
@@ -69,9 +69,9 @@ namespace EvFutBot.Models
             }
             if (cards.Count != 1) // check average without first card)
             {
-                List<OrderCard> avgcCards = cards.ToList(); // we clone it
+                var avgcCards = cards.ToList(); // we clone it
                 avgcCards.RemoveAt(cards.Count - 1);
-                double average = avgcCards.Average(card => card.Bin);
+                var average = avgcCards.Average(card => card.Bin);
                 // we see if we have stock avg ballpark 
                 if (average >= Account.SmallAccount*6 && GetAvgAccountStock(platform, average) <= avgcCards.Count)
                 {
@@ -80,10 +80,10 @@ namespace EvFutBot.Models
                 }
             }
 
-            Random rand = new Random();
-            foreach (OrderCard card in cards)
+            var rand = new Random();
+            foreach (var card in cards)
             {
-                int randDelay = rand.Next(60, 120);
+                var randDelay = rand.Next(60, 120);
                 Thread.Sleep(randDelay*1000); // sleep 1-2 minutes                       
                 AddCard(platform, card, Account.CardStatuses.New, order.Id);
             }
@@ -359,7 +359,7 @@ namespace EvFutBot.Models
             string path = $"/evoctrl/api/check/?key={Apikey}";
             try
             {
-                string json = await Get(path);
+                var json = await Get(path);
                 return json.Length != 0 && json != "[]"
                     ? JsonConvert.DeserializeObject<Demand>(json)
                     : null;
@@ -375,11 +375,11 @@ namespace EvFutBot.Models
         private static async Task<IEnumerable<OrderCard>> ReserveOrder(Platform platform, Order order)
         {
             const string path = "/evoctrl/api/reserve/";
-            string platformEvo = platform.ToString();
+            var platformEvo = platform.ToString();
             if (platformEvo == "Ps4") platformEvo = "PS4";
             if (platformEvo == "Ps3") platformEvo = "PS3";
 
-            FormUrlEncodedContent data = new FormUrlEncodedContent(new[]
+            var data = new FormUrlEncodedContent(new[]
             {
                 new KeyValuePair<string, string>("key", Apikey),
                 new KeyValuePair<string, string>("console", platformEvo),
@@ -389,7 +389,7 @@ namespace EvFutBot.Models
 
             try
             {
-                string json = await Post(path, data);
+                var json = await Post(path, data);
                 return json.Length != 0 && json != "[]"
                     ? JsonConvert.DeserializeObject<IEnumerable<OrderCard>>(json)
                     : null;
@@ -406,11 +406,11 @@ namespace EvFutBot.Models
         private static async Task CancelOrder(Platform platform, Order order, string why = "")
         {
             const string path = "/evoctrl/api/cancel/";
-            string platformEvo = platform.ToString();
+            var platformEvo = platform.ToString();
             if (platformEvo == "Ps4") platformEvo = "PS4";
             if (platformEvo == "Ps3") platformEvo = "PS3";
 
-            FormUrlEncodedContent data = new FormUrlEncodedContent(new[]
+            var data = new FormUrlEncodedContent(new[]
             {
                 new KeyValuePair<string, string>("key", Apikey),
                 new KeyValuePair<string, string>("console", platformEvo),
@@ -432,11 +432,11 @@ namespace EvFutBot.Models
         private static async Task CompleteOrder(Platform platform, Order order)
         {
             const string path = "/evoctrl/api/complete/";
-            string platformEvo = platform.ToString();
+            var platformEvo = platform.ToString();
             if (platformEvo == "Ps4") platformEvo = "PS4";
             if (platformEvo == "Ps3") platformEvo = "PS3";
 
-            FormUrlEncodedContent data = new FormUrlEncodedContent(new[]
+            var data = new FormUrlEncodedContent(new[]
             {
                 new KeyValuePair<string, string>("key", Apikey),
                 new KeyValuePair<string, string>("console", platformEvo),
@@ -449,7 +449,7 @@ namespace EvFutBot.Models
             try
             {
                 byte i = 0;
-                string result = await Post(path, data);
+                var result = await Post(path, data);
                 while (result != "Successfully Submitted") // we try 6 times
                 {
                     if (i == 6) break;
@@ -480,11 +480,11 @@ namespace EvFutBot.Models
 
         private static async Task<string> Get(string path)
         {
-            using (HttpClientHandler handler = new HttpClientHandler())
-            using (HttpClient httpClient = new HttpClient(handler))
+            using (var handler = new HttpClientHandler())
+            using (var httpClient = new HttpClient(handler))
             {
                 httpClient.BaseAddress = new Uri(BaseUri);
-                HttpResponseMessage result = await httpClient.GetAsync(path);
+                var result = await httpClient.GetAsync(path);
                 result.EnsureSuccessStatusCode();
 
                 return await result.Content.ReadAsStringAsync();
@@ -493,11 +493,11 @@ namespace EvFutBot.Models
 
         private static async Task<string> Post(string path, FormUrlEncodedContent data)
         {
-            using (HttpClientHandler handler = new HttpClientHandler())
-            using (HttpClient httpClient = new HttpClient(handler))
+            using (var handler = new HttpClientHandler())
+            using (var httpClient = new HttpClient(handler))
             {
                 httpClient.BaseAddress = new Uri(BaseUri);
-                HttpResponseMessage result = await httpClient.PostAsync(path, data).ConfigureAwait(false);
+                var result = await httpClient.PostAsync(path, data).ConfigureAwait(false);
                 result.EnsureSuccessStatusCode();
 
                 return await result.Content.ReadAsStringAsync();

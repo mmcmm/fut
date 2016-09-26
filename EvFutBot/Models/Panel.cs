@@ -86,7 +86,7 @@ namespace EvFutBot.Models
         {
             try
             {
-                string startedAt = Database.GetAccountStartedAt(Account, Environment.MachineName, Status);
+                var startedAt = Database.GetAccountStartedAt(Account, Environment.MachineName, Status);
                 return Convert.ToDateTime(startedAt);
             }
             catch (SshException)
@@ -95,7 +95,7 @@ namespace EvFutBot.Models
                 {
                     Thread.Sleep(30*1000);
                     Database.SshConnect();
-                    string startedAt = Database.GetAccountStartedAt(Account, Environment.MachineName, Status);
+                    var startedAt = Database.GetAccountStartedAt(Account, Environment.MachineName, Status);
                     return Convert.ToDateTime(startedAt);
                 }
                 catch (Exception ex)
@@ -109,7 +109,7 @@ namespace EvFutBot.Models
                 try
                 {
                     Thread.Sleep(30*1000);
-                    string startedAt = Database.GetAccountStartedAt(Account, Environment.MachineName, Status);
+                    var startedAt = Database.GetAccountStartedAt(Account, Environment.MachineName, Status);
                     return Convert.ToDateTime(startedAt);
                 }
                 catch (MySqlException)
@@ -117,7 +117,7 @@ namespace EvFutBot.Models
                     try
                     {
                         Thread.Sleep(30*1000);
-                        string startedAt = Database.GetAccountStartedAt(Account, Environment.MachineName, Status);
+                        var startedAt = Database.GetAccountStartedAt(Account, Environment.MachineName, Status);
                         return Convert.ToDateTime(startedAt);
                     }
                     catch (Exception ex)

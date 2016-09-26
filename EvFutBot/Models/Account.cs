@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -103,7 +102,7 @@ namespace EvFutBot.Models
         {
             if (viacookie && File.Exists(_cookie))
             {
-                CookieContainer cookie = CookieUtil.ReadCookiesFromDisk(_cookie);
+                var cookie = CookieUtil.ReadCookiesFromDisk(_cookie);
                 _utClient = new FutClient(cookie);
             }
             else
@@ -113,25 +112,25 @@ namespace EvFutBot.Models
             try
             {
                 ITwoFactorCodeProvider provider = new ImapTwoFactorCodeProvider(Gmail, _gpassword, Email);
-                LoginDetails loginDetails = new LoginDetails(Email, _password, _utSecurityAnswer, Platform, Login);
-                LoginResponse loginResponse = await _utClient.LoginAsync(loginDetails, provider);
+                var loginDetails = new LoginDetails(Email, _password, _utSecurityAnswer, Platform, Login);
+                var loginResponse = await _utClient.LoginAsync(loginDetails, provider);
 
-                CookieContainer cookiecontainer = _utClient.RequestFactories.CookieContainer;
+                var cookiecontainer = _utClient.RequestFactories.CookieContainer;
                 CookieUtil.DeleteCookieFromDisk(_cookie);
                 CookieUtil.WriteCookiesToDisk(_cookie, cookiecontainer);
                 return loginResponse;
             }
             catch (ExpiredSessionException ex)
             {
-                Random rand = new Random();
-                int randDelay = rand.Next(60, 240);
+                var rand = new Random();
+                var randDelay = rand.Next(60, 240);
                 await HandleException(ex, randDelay, Email);
                 return null;
             }
             catch (ArgumentException ex)
             {
-                Random rand = new Random();
-                int randDelay = rand.Next(60, 240);
+                var rand = new Random();
+                var randDelay = rand.Next(60, 240);
                 await HandleException(ex, randDelay, 1, Email); // we try just 1 hour
                 return null;
             }
@@ -142,8 +141,8 @@ namespace EvFutBot.Models
             }
             catch (HttpRequestException ex)
             {
-                Random rand = new Random();
-                int randDelay = rand.Next(60, 240);
+                var rand = new Random();
+                var randDelay = rand.Next(60, 240);
                 await HandleException(ex, randDelay, Email);
                 return null;
             }
@@ -231,7 +230,7 @@ namespace EvFutBot.Models
                 // we start with a clean-ish slate. 
                 await ControlTradePile(settings, _startedAt);
                 await ControlWatchList(settings, _startedAt);
-                List<Player> players = GetPotentialPlayers(settings.Batch, settings.MaxCardCost);
+                var players = GetPotentialPlayers(settings.Batch, settings.MaxCardCost);
 
                 while (true) // main loop
                 {
@@ -266,8 +265,8 @@ namespace EvFutBot.Models
                     // less for 360
                     if (Credits <= SmallAccount && !(Platform == Platform.Xbox360 && Credits >= 1500))
                     {
-                        int tradePileSize = await GetTradePileSize(settings);
-                        int watchListSize = await GetWatchListSize(settings);
+                        var tradePileSize = await GetTradePileSize(settings);
+                        var watchListSize = await GetWatchListSize(settings);
 
                         // we must not lose control
                         if (watchListSize <= WatchListMax/5 && tradePileSize <= TradePileMax/3)
@@ -296,15 +295,15 @@ namespace EvFutBot.Models
 
         public async Task<bool> SearchAndBuy(Player player, Settings settings, bool bid, DateTime startedAt)
         {
-            uint stdPrice = player.GetStdPrice(Platform);
-            uint sellPrice = GetEaPrice(stdPrice, settings.SellPercent);
-            uint maxPrice = GetEaPrice(stdPrice, CalculatePercent(stdPrice, bid, settings));
-            uint minPrice = GetEaPrice(CalculateMinPrice(maxPrice), 100);
+            var stdPrice = player.GetStdPrice(Platform);
+            var sellPrice = GetEaPrice(stdPrice, settings.SellPercent);
+            var maxPrice = GetEaPrice(stdPrice, CalculatePercent(stdPrice, bid, settings));
+            var minPrice = GetEaPrice(CalculateMinPrice(maxPrice), 100);
             if (maxPrice > Credits) return false;
 
             AuctionResponse searchResponse;
-            uint prevBid = AuctionInfo.CalculatePreviousBid(maxPrice);
-            PlayerSearchParameters searchParameters = new PlayerSearchParameters
+            var prevBid = AuctionInfo.CalculatePreviousBid(maxPrice);
+            var searchParameters = new PlayerSearchParameters
             {
                 Page = 1,
                 Level = player.Level,
@@ -365,7 +364,7 @@ namespace EvFutBot.Models
             }
             Credits = searchResponse.Credits;
 
-            foreach (AuctionInfo auction in searchResponse.AuctionInfo.Where(
+            foreach (var auction in searchResponse.AuctionInfo.Where(
                 auction => auction.ItemData.AssetId == player.BaseId && auction.ItemData.Rating == player.Rating))
             {
                 if (!bid)
@@ -376,7 +375,7 @@ namespace EvFutBot.Models
                 else
                 {
                     if (auction.Expires <= settings.PreBidDelay || auction.Expires > 5*60) continue;
-                    uint nextbid = auction.CalculateBid();
+                    var nextbid = auction.CalculateBid();
                     if (nextbid > maxPrice) continue;
                     if (auction.Expires <= 30) maxPrice = nextbid;
                 }
@@ -385,16 +384,16 @@ namespace EvFutBot.Models
                 try
                 {
                     await Task.Delay(settings.PreBidDelay);
-                    AuctionResponse placeBid = await _utClient.PlaceBidAsync(auction, maxPrice);
+                    var placeBid = await _utClient.PlaceBidAsync(auction, maxPrice);
                     if (placeBid.AuctionInfo == null) continue;
-                    AuctionInfo boughtAction = placeBid.AuctionInfo.FirstOrDefault();
+                    var boughtAction = placeBid.AuctionInfo.FirstOrDefault();
 
                     if (boughtAction != null && boughtAction.TradeState == "closed")
                     {
                         await Task.Delay(settings.RmpDelay);
-                        SendItemToTradePileResponse tradePileResponse =
+                        var tradePileResponse =
                             await _utClient.SendItemToTradePileAsync(boughtAction.ItemData);
-                        TradePileItem tradeItem = tradePileResponse.ItemData.FirstOrDefault();
+                        var tradeItem = tradePileResponse.ItemData.FirstOrDefault();
 
                         if (tradeItem != null)
                         {
@@ -453,7 +452,7 @@ namespace EvFutBot.Models
 
         public static bool ShouldNotWork(DateTime startedAt, int shouldRunFor)
         {
-            TimeSpan span = DateTime.Now.Subtract(startedAt);
+            var span = DateTime.Now.Subtract(startedAt);
             return Math.Abs(span.Hours) >= shouldRunFor;
         }
 
@@ -606,9 +605,9 @@ namespace EvFutBot.Models
                     await HandleException(ex, settings.SecurityDelay, Email);
                 }
                 // we also log them
-                foreach (AuctionInfo closedCard in tradePileList.AuctionInfo.Where(g => g.TradeState == "closed"))
+                foreach (var closedCard in tradePileList.AuctionInfo.Where(g => g.TradeState == "closed"))
                 {
-                    uint price = closedCard.CurrentBid != 0 ? closedCard.CurrentBid : closedCard.BuyNowPrice;
+                    var price = closedCard.CurrentBid != 0 ? closedCard.CurrentBid : closedCard.BuyNowPrice;
                     Logger.LogTransaction(Email, price, closedCard.ItemData.Rating, closedCard.ItemData.AssetId,
                         tradePileList.AuctionInfo.Count, Logger.Labels.Closed, Platform);
                 }
@@ -616,7 +615,7 @@ namespace EvFutBot.Models
 
             // clear any useless cards in the account that clog the tradepile
             foreach (
-                AuctionInfo card in
+                var card in
                     tradePileList.AuctionInfo.Where(
                         card => (card.ItemData.ItemType == "player" && card.ItemData.Rating <= 70)
                                 || card.ItemData.ItemType != "player"))
@@ -658,12 +657,12 @@ namespace EvFutBot.Models
             }
 
             // relist expired
-            foreach (AuctionInfo expiredCard in tradePileList.AuctionInfo.Where(g => g.TradeState == "expired"))
+            foreach (var expiredCard in tradePileList.AuctionInfo.Where(g => g.TradeState == "expired"))
             {
                 try
                 {
                     // we lower price if trade pile gets full 
-                    uint sellPrice = expiredCard.BuyNowPrice == 0
+                    var sellPrice = expiredCard.BuyNowPrice == 0
                         ? GetWonBidPrice(expiredCard.ItemData.AssetId, expiredCard.ItemData.LastSalePrice,
                             expiredCard.ItemData.Rating, settings.SellPercent)
                         : AuctionInfo.CalculatePreviousBid(expiredCard.BuyNowPrice);
@@ -708,7 +707,7 @@ namespace EvFutBot.Models
             }
 
             // list won bids
-            foreach (AuctionInfo wonBidCard in tradePileList.AuctionInfo.Where(g => g.TradeState == null))
+            foreach (var wonBidCard in tradePileList.AuctionInfo.Where(g => g.TradeState == null))
             {
                 uint sellPrice = 0;
                 try
@@ -726,16 +725,16 @@ namespace EvFutBot.Models
                     try
                     {
                         await Task.Delay(settings.RmpDelay);
-                        List<PriceRange> ranges =
+                        var ranges =
                             await _utClient.GetPriceRangesAsync(new List<long> {wonBidCard.ItemData.Id});
                         if (ranges.Count != 0 && (sellPrice >= ranges[0].MaxPrice || sellPrice <= ranges[0].MinPrice))
                         {
                             await Task.Delay(settings.RmpDelay);
                             await
                                 _utClient.ListAuctionAsync(new AuctionDetails(wonBidCard.ItemData.Id,
-                                    GetAuctionDuration(startedAt, settings.RunforHours, Login), 
+                                    GetAuctionDuration(startedAt, settings.RunforHours, Login),
                                     AuctionInfo.CalculateNextBid(ranges[0].MinPrice),
-                                     AuctionInfo.CalculatePreviousBid(ranges[0].MaxPrice)));
+                                    AuctionInfo.CalculatePreviousBid(ranges[0].MaxPrice)));
                         }
                     }
                     catch (Exception)
@@ -809,7 +808,7 @@ namespace EvFutBot.Models
                 return false;
             }
 
-            foreach (ItemData purchasedCard in unassignedList.ItemData)
+            foreach (var purchasedCard in unassignedList.ItemData)
             {
                 try
                 {
@@ -968,7 +967,7 @@ namespace EvFutBot.Models
             }
 
             // remove expired/outbid cards
-            List<AuctionInfo> outbidAuctions =
+            var outbidAuctions =
                 watchList.AuctionInfo.Where(watchCard => watchCard.BidState == "outbid").ToList();
             if (outbidAuctions.Count != 0)
             {
@@ -997,7 +996,7 @@ namespace EvFutBot.Models
 
             // move won bid items and skip bugged cards.
             foreach (
-                AuctionInfo watchCard in
+                var watchCard in
                     watchList.AuctionInfo.Where(
                         watchCard => watchCard.TradeState == "closed" && watchCard.BidState != "outbid")
                         .Where(watchCard => !BuggedCardsWl.Contains(watchCard.ItemData.Id)))
@@ -1048,7 +1047,7 @@ namespace EvFutBot.Models
             }
 
             // remove bugged expired cards that doesn't show outbid
-            List<AuctionInfo> expiredAuctionsNone =
+            var expiredAuctionsNone =
                 watchList.AuctionInfo.Where(
                     watchCard => watchCard.BidState == "none" && watchCard.TradeState == "expired").ToList();
             if (expiredAuctionsNone.Count != 0)
@@ -1085,7 +1084,7 @@ namespace EvFutBot.Models
             }
             // move the overflow cards
             foreach (
-                AuctionInfo watchCard in
+                var watchCard in
                     watchList.AuctionInfo.Where(
                         watchCard =>
                             watchCard.TradeState == "expired" && watchCard.ItemData.ItemState != "invalid" &&
@@ -1143,8 +1142,8 @@ namespace EvFutBot.Models
             try
             {
                 await Task.Delay(settings.RmpDelayLow);
-                ListGiftsResponse giftsResponse = await _utClient.GetGiftsListAsync();
-                foreach (GiftMessage gift in giftsResponse.ActiveMessage)
+                var giftsResponse = await _utClient.GetGiftsListAsync();
+                foreach (var gift in giftsResponse.ActiveMessage)
                 {
                     await Task.Delay(settings.RmpDelayLow);
                     await _utClient.GetGiftAsync(gift.Id);
@@ -1186,14 +1185,14 @@ namespace EvFutBot.Models
             try
             {
                 await Task.Delay(settings.RmpDelayLow);
-                StoreResponse storeResponse = await _utClient.GetPackDetailsAsync();
-                foreach (Pack packDetail in storeResponse.Purchase
+                var storeResponse = await _utClient.GetPackDetailsAsync();
+                foreach (var packDetail in storeResponse.Purchase
                     .Where(p => p.Coins == 0 && p.FifaCashPrice == 0))
                 {
-                    PackDetails pacDetails = new PackDetails(packDetail.Id, Currency.MTX, 0, true);
+                    var pacDetails = new PackDetails(packDetail.Id, Currency.MTX, 0, true);
 
                     await Task.Delay(settings.RmpDelayLow);
-                    PurchasedPackResponse buyPackResponse = await _utClient.BuyPackAsync(pacDetails);
+                    var buyPackResponse = await _utClient.BuyPackAsync(pacDetails);
 
                     await Task.Delay(settings.RmpDelayLow);
                     await _utClient.QuickSellItemAsync(buyPackResponse.ItemIdList);

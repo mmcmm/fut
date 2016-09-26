@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using EvFutBot.Models;
 using EvFutBot.Utilities;
 using UltimateTeam.Toolkit.Exceptions;
-using UltimateTeam.Toolkit.Models;
 
 namespace EvFutBot
 {
@@ -24,13 +23,13 @@ namespace EvFutBot
 
         public async Task<bool> LoginAndWork()
         {
-            LoginResponse loginResponse = await _account.LoginFut();
+            var loginResponse = await _account.LoginFut();
             byte i = 1;
             while (loginResponse == null)
             {
                 _account.Disconnect();
-                Random rand = new Random();
-                int randDelay = rand.Next(60, 1500);
+                var rand = new Random();
+                var randDelay = rand.Next(60, 1500);
                 await Task.Delay(randDelay*1000);
                 loginResponse = await _account.LoginFut(i != 3 || i != 9); // we try without cookie
 

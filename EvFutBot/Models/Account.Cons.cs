@@ -18,7 +18,7 @@ namespace EvFutBot.Models
             if (maxPrice > Credits) return false;
 
             AuctionResponse searchResponse;
-            DevelopmentSearchParameters searchParameters = new DevelopmentSearchParameters
+            var searchParameters = new DevelopmentSearchParameters
             {
                 Page = page,
                 DevelopmentType = DevelopmentType.Contract,
@@ -59,11 +59,11 @@ namespace EvFutBot.Models
             }
             Credits = searchResponse.Credits;
 
-            foreach (AuctionInfo auction in
+            foreach (var auction in
                 searchResponse.AuctionInfo.Where(auction => auction.ItemData.ResourceId == -2142482645))
             {
                 if (auction.Expires <= settings.RmpDelay/1000/6 || auction.Expires >= 6*60) continue;
-                uint nextbid = auction.CalculateBid();
+                var nextbid = auction.CalculateBid();
                 if (nextbid > maxPrice) continue;
                 maxPrice = nextbid;
                 if (maxPrice > Credits) continue;
@@ -71,16 +71,16 @@ namespace EvFutBot.Models
                 try
                 {
                     await Task.Delay(Convert.ToInt32(settings.PreBidDelay));
-                    AuctionResponse placeBid = await _utClient.PlaceBidAsync(auction, maxPrice);
+                    var placeBid = await _utClient.PlaceBidAsync(auction, maxPrice);
                     if (placeBid.AuctionInfo == null) continue;
-                    AuctionInfo boughtAction = placeBid.AuctionInfo.FirstOrDefault();
+                    var boughtAction = placeBid.AuctionInfo.FirstOrDefault();
 
                     if (boughtAction != null && boughtAction.TradeState == "closed")
                     {
                         await Task.Delay(settings.RmpDelay);
-                        SendItemToTradePileResponse tradePileResponse =
+                        var tradePileResponse =
                             await _utClient.SendItemToTradePileAsync(boughtAction.ItemData);
-                        TradePileItem tradeItem = tradePileResponse.ItemData.FirstOrDefault();
+                        var tradeItem = tradePileResponse.ItemData.FirstOrDefault();
 
                         if (tradeItem != null)
                         {

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
@@ -8,7 +7,6 @@ using EvFutBot.Utilities;
 using MySql.Data.MySqlClient;
 using Renci.SshNet.Common;
 using UltimateTeam.Toolkit.Exceptions;
-using UltimateTeam.Toolkit.Models;
 using UltimateTeam.Toolkit.Parameters;
 
 namespace EvFutBot.Models
@@ -19,10 +17,10 @@ namespace EvFutBot.Models
         {
             return Task.Run(async () =>
             {
-                DateTime startedAt = Convert.ToDateTime(panel.StartedAt);
+                var startedAt = Convert.ToDateTime(panel.StartedAt);
 
                 await ClearGiftList(settings);
-                List<Player> players = Player.GetAllCardWeightPlayers();
+                var players = Player.GetAllCardWeightPlayers();
 
                 while (true) // main loop
                 {
@@ -49,8 +47,8 @@ namespace EvFutBot.Models
 
         public async Task<int> SearchAndGetCardWeight(Player player, Settings settings)
         {
-            int results = 0;
-            PlayerSearchParameters searchParameters = new PlayerSearchParameters
+            var results = 0;
+            var searchParameters = new PlayerSearchParameters
             {
                 Page = 1,
                 ResourceId = player.AssetId,
@@ -60,7 +58,7 @@ namespace EvFutBot.Models
             try
             {
                 await Task.Delay(settings.RmpDelay);
-                AuctionResponse searchResponse = await _utClient.SearchAsync(searchParameters);
+                var searchResponse = await _utClient.SearchAsync(searchParameters);
                 results += searchResponse.AuctionInfo.Count(c => c.ItemData.Rating == player.Rating);
                 while (searchResponse.AuctionInfo.Count != 0)
                 {

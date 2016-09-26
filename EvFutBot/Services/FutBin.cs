@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -42,22 +41,22 @@ namespace EvFutBot.Services
             return Task.Run(async () =>
             {
                 // change to get all zero price players
-                List<Player> players = Player.GetAllPlayers();
-                foreach (Player player in players)
+                var players = Player.GetAllPlayers();
+                foreach (var player in players)
                 {
-                    int i = 1;
-                    bool oldgen = false;
-                    foreach (Platform[] platformGroup in Platforms)
+                    var i = 1;
+                    var oldgen = false;
+                    foreach (var platformGroup in Platforms)
                     {
                         if (i%2 == 0) oldgen = true;
 
                         await Task.Delay(2000);
                         uint xboxPrice = 0;
                         uint psPrice = 0;
-                        string rawjson = await GetFutBinPrices(player.AssetId, PlayerUriH, oldgen);
-                        JToken token = JToken.Parse(rawjson);
-                        JToken xbox = token.SelectToken("xbox");
-                        JToken ps = token.SelectToken("ps");
+                        var rawjson = await GetFutBinPrices(player.AssetId, PlayerUriH, oldgen);
+                        var token = JToken.Parse(rawjson);
+                        var xbox = token.SelectToken("xbox");
+                        var ps = token.SelectToken("ps");
 
                         if (xbox.Any())
                             xboxPrice = Convert.ToUInt32(token.SelectToken("xbox").Last.Last);
@@ -144,9 +143,9 @@ namespace EvFutBot.Services
             await Task.Delay(2000);
             uint xboxPrice = 0;
 
-            string rawjson = await GetFutBinPrices(assetId, PlayerUriH, false);
-            JToken token = JToken.Parse(rawjson);
-            JToken xbox = token.SelectToken("xbox");
+            var rawjson = await GetFutBinPrices(assetId, PlayerUriH, false);
+            var token = JToken.Parse(rawjson);
+            var xbox = token.SelectToken("xbox");
 
             if (xbox.Any())
                 xboxPrice = Convert.ToUInt32(token.SelectToken("xbox").Last.Last);
@@ -166,10 +165,10 @@ namespace EvFutBot.Services
 
         public static async Task<string> GetFutBinPrices(uint assetId, string playerUri, bool oldgen)
         {
-            using (HttpClientHandler handler = new HttpClientHandler {UseCookies = false})
-            using (HttpClient httpClient = new HttpClient(handler))
+            using (var handler = new HttpClientHandler {UseCookies = false})
+            using (var httpClient = new HttpClient(handler))
             {
-                HttpRequestMessage authRequest = new HttpRequestMessage
+                var authRequest = new HttpRequestMessage
                 {
                     Method = HttpMethod.Get,
                     RequestUri = new Uri(BaseUri + playerUri + assetId)
@@ -185,7 +184,7 @@ namespace EvFutBot.Services
                         ? "gentype=oldgen; platform=ps4; 17_field=full_sunny; xbox=true; ps=true; consoletype=ps4;"
                         : "gentype=newgen; platform=ps4; 17_field=full_sunny; xbox=true; ps=true; consoletype=ps4;");
 
-                HttpResponseMessage result = await httpClient.SendAsync(authRequest);
+                var result = await httpClient.SendAsync(authRequest);
                 return await result.Content.ReadAsStringAsync();
             }
         }

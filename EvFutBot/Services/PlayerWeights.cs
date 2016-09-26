@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
@@ -42,15 +41,15 @@ namespace EvFutBot.Services
 
         public static async Task GetNewPlayers()
         {
-            PlayersSearchRequest results = await SearchDatabase(1);
-            List<Item> items = results?.Items;
+            var results = await SearchDatabase(1);
+            var items = results?.Items;
             for (uint i = 1; i <= results?.TotalPages; i++)
             {
                 if (items != null)
                 {
-                    foreach (Item item in items.Where(item => CardTypes.Contains(item.Color)))
+                    foreach (var item in items.Where(item => CardTypes.Contains(item.Color)))
                     {
-                        uint price = await FutBin.GetFutBinXbOnePrice(Convert.ToUInt32(item.Id));
+                        var price = await FutBin.GetFutBinXbOnePrice(Convert.ToUInt32(item.Id));
                         if (price >= PriceMin && price <= PriceMax)
                         {
                             SaveNewPlayer(item.BaseId, item.Id, item.Rating, item.CommonName, item.FirstName,
@@ -65,9 +64,9 @@ namespace EvFutBot.Services
 
         private static async Task<PlayersSearchRequest> SearchDatabase(uint page)
         {
-            HttpClient dbClient = new HttpClient();
-            string pageNr = "{\"page\":\"" + page + "\"}";
-            HttpResponseMessage playersJson = await dbClient.GetAsync(DatabaseSearchUrl + pageNr);
+            var dbClient = new HttpClient();
+            var pageNr = "{\"page\":\"" + page + "\"}";
+            var playersJson = await dbClient.GetAsync(DatabaseSearchUrl + pageNr);
             playersJson.EnsureSuccessStatusCode();
             return JsonConvert.DeserializeObject<PlayersSearchRequest>(await playersJson.Content.ReadAsStringAsync());
         }

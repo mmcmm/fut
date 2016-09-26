@@ -18,8 +18,8 @@ namespace EvFutBot.Models
             }
             Disconnect();
             Logger.LogException(ex.Message, ex.ToString(), Email);
-            Random rand = new Random();
-            int randDelay = rand.Next(securityDelay/1000, 1500);
+            var rand = new Random();
+            var randDelay = rand.Next(securityDelay/1000, 1500);
             await Task.Delay(randDelay*1000);
             await LoginFut(false);
         }
@@ -29,8 +29,8 @@ namespace EvFutBot.Models
             Disconnect();
             Logger.LogException(ex.Message, ex.ToString(), Email);
 
-            Random rand = new Random();
-            int randDelay = rand.Next(securityDelay/1000, 1500);
+            var rand = new Random();
+            var randDelay = rand.Next(securityDelay/1000, 1500);
             await Task.Delay(randDelay*1000);
             await LoginFut();
         }
@@ -54,8 +54,8 @@ namespace EvFutBot.Models
             if (ex.Message.IndexOf("401", StringComparison.Ordinal) != -1)
             {
                 Disconnect();
-                Random rand = new Random();
-                int randDelay = rand.Next(securityDelay/1000, 1500);
+                var rand = new Random();
+                var randDelay = rand.Next(securityDelay/1000, 1500);
                 await Task.Delay(randDelay*1000);
                 await LoginFut();
             }

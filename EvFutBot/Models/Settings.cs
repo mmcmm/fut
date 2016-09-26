@@ -21,7 +21,7 @@ namespace EvFutBot.Models
             if (rpmDelay[0] < 4)
                 throw new ArgumentOutOfRangeException(nameof(rpmDelay), "RPM Delay to small");
 
-            Random rand = new Random();
+            var rand = new Random();
             RmpDelay = rand.Next(rpmDelay[0]*1000, rpmDelay[1]*1000);
             RmpDelayLow = 2*1000; // 2 seconds
             PreBidDelay = 0; // no delay

@@ -18,12 +18,12 @@ namespace EvFutBot.Models
         public async Task BuyCustomerCards(Settings settings, DateTime startedAt)
         {
             if (Credits <= SmallAccount) return;
-            uint tosell = Credits - SmallAccount;
+            var tosell = Credits - SmallAccount;
             if (tosell < 10000) return;
-            List<OrderCard> cards = GetCustomerCards(tosell);
+            var cards = GetCustomerCards(tosell);
             if (cards.Count == 0) return;
 
-            foreach (OrderCard card in cards)
+            foreach (var card in cards)
             {
                 await SearchAndBuyCc(card, settings, startedAt);
             }
@@ -38,7 +38,7 @@ namespace EvFutBot.Models
             }
 
             AuctionResponse searchResponse;
-            PlayerSearchParameters searchParameters = new PlayerSearchParameters
+            var searchParameters = new PlayerSearchParameters
             {
                 Page = 1,
                 ResourceId = card.BaseId,
@@ -116,7 +116,7 @@ namespace EvFutBot.Models
             }
 
             Credits = searchResponse.Credits;
-            foreach (AuctionInfo auction in searchResponse.AuctionInfo.Where(
+            foreach (var auction in searchResponse.AuctionInfo.Where(
                 auction => auction.TradeId == card.TradeId))
             {
                 if (card.Bin >= Credits)
@@ -179,15 +179,15 @@ namespace EvFutBot.Models
                         return false;
                     }
 
-                    AuctionInfo boughtAction = placeBid.AuctionInfo.FirstOrDefault();
+                    var boughtAction = placeBid.AuctionInfo.FirstOrDefault();
                     if (boughtAction != null && boughtAction.TradeState == "closed")
                     {
                         MarkBoughtCard(card.TradeId); // deal one.. now relisting
 
                         await Task.Delay(settings.RmpDelayLow);
-                        SendItemToTradePileResponse tradePileResponse =
+                        var tradePileResponse =
                             await _utClient.SendItemToTradePileAsync(boughtAction.ItemData);
-                        TradePileItem tradeItem = tradePileResponse.ItemData.FirstOrDefault();
+                        var tradeItem = tradePileResponse.ItemData.FirstOrDefault();
 
                         if (tradeItem != null)
                         {
@@ -204,7 +204,7 @@ namespace EvFutBot.Models
                                     try
                                     {
                                         await Task.Delay(settings.RmpDelayLow);
-                                        List<PriceRange> ranges =
+                                        var ranges =
                                             await
                                                 _utClient.GetPriceRangesAsync(new List<long> {boughtAction.ItemData.Id});
                                         if (ranges.Count != 0)
@@ -228,7 +228,7 @@ namespace EvFutBot.Models
                             }
                             else
                             {
-                                uint sellPrice = AuctionInfo.CalculateNextBid(card.Value);
+                                var sellPrice = AuctionInfo.CalculateNextBid(card.Value);
                                 auctionDetails = new AuctionDetails(boughtAction.ItemData.Id,
                                     GetAuctionDuration(startedAt, settings.RunforHours, Login),
                                     CalculateBidPrice(sellPrice, settings.SellPercent), sellPrice);

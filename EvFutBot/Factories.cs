@@ -11,7 +11,7 @@ namespace EvFutBot
     {
         public static List<Account> MakeAccounts(IDataReader reader, AppVersion login)
         {
-            List<Account> accounts = new List<Account>();
+            var accounts = new List<Account>();
             while (reader.Read())
             {
                 accounts.Add(new Account(
@@ -33,8 +33,8 @@ namespace EvFutBot
         {
             while (reader.Read())
             {
-                string[] runforHours = ((string) reader["runfor_hours"]).Split(',');
-                string[] rpmDelay = ((string) reader["rpm_delay"]).Split(',');
+                var runforHours = ((string) reader["runfor_hours"]).Split(',');
+                var rpmDelay = ((string) reader["rpm_delay"]).Split(',');
                 try
                 {
                     return new Settings(
@@ -60,7 +60,7 @@ namespace EvFutBot
 
         public static List<OrderCard> MakeOrderCards(IDataReader reader)
         {
-            List<OrderCard> cards = new List<OrderCard>();
+            var cards = new List<OrderCard>();
             while (reader.Read())
             {
                 cards.Add(new OrderCard
@@ -77,7 +77,7 @@ namespace EvFutBot
 
         public static List<Player> MakePlayers(IDataReader reader)
         {
-            List<Player> players = new List<Player>();
+            var players = new List<Player>();
 
             while (reader.Read())
             {
@@ -101,7 +101,7 @@ namespace EvFutBot
 
         public static List<Player> MakeCardWeightPlayers(IDataReader reader)
         {
-            List<Player> players = new List<Player>();
+            var players = new List<Player>();
 
             while (reader.Read())
             {

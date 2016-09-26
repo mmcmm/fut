@@ -10,7 +10,6 @@ using MySql.Data.MySqlClient;
 using Newtonsoft.Json;
 using Renci.SshNet.Common;
 using UltimateTeam.Toolkit.Models;
-using Item = EvFutBot.Utilities.Item;
 
 // won bids, Won BINs average bid, average BIN, average sold, In TradePiles, Profit/Loss
 
@@ -32,15 +31,15 @@ namespace EvFutBot.Services
             return Task.Run(async () =>
             {
                 ClearPlayerStatistics();
-                List<Player> players = Player.GetAllPlayers();
+                var players = Player.GetAllPlayers();
 
-                foreach (Platform platform in Platforms)
+                foreach (var platform in Platforms)
                 {
-                    foreach (Player player in players.Where(player => player.BaseId != 0))
+                    foreach (var player in players.Where(player => player.BaseId != 0))
                     {
                         await Task.Run(() =>
                         {
-                            Dictionary<string, long> stats = GetPlayerStatistics(player.AssetId, player.BaseId,
+                            var stats = GetPlayerStatistics(player.AssetId, player.BaseId,
                                 player.Rating, platform);
                             if (stats != null) SavePlayerStatistics(player, stats, platform);
                         });
@@ -55,8 +54,8 @@ namespace EvFutBot.Services
             return Task.Run(async () =>
             {
                 // we do this after you add players
-                List<Player> players = Player.GetAllPlayers();
-                foreach (Player player in players)
+                var players = Player.GetAllPlayers();
+                foreach (var player in players)
                 {
                     try
                     {
@@ -74,8 +73,8 @@ namespace EvFutBot.Services
 
         public static async Task GetBaseId(uint assetId)
         {
-            PlayersSearchRequest results = await SearchDatabase(assetId);
-            List<Item> items = results?.Items;
+            var results = await SearchDatabase(assetId);
+            var items = results?.Items;
             if (items?[0].BaseId > 0)
             {
                 SaveBaseId(items[0].BaseId, assetId, items[0].Rating);
@@ -84,9 +83,9 @@ namespace EvFutBot.Services
 
         private static async Task<PlayersSearchRequest> SearchDatabase(uint assetId)
         {
-            HttpClient dbClient = new HttpClient();
-            string searchFor = "{\"id\":\"" + assetId + "\"}";
-            HttpResponseMessage playersJson = await dbClient.GetAsync(DatabaseSearchUrl + searchFor);
+            var dbClient = new HttpClient();
+            var searchFor = "{\"id\":\"" + assetId + "\"}";
+            var playersJson = await dbClient.GetAsync(DatabaseSearchUrl + searchFor);
             playersJson.EnsureSuccessStatusCode();
             return JsonConvert.DeserializeObject<PlayersSearchRequest>(await playersJson.Content.ReadAsStringAsync());
         }

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
-using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using EvFutBot.Models;
@@ -45,44 +44,44 @@ namespace EvFutBot
                     }).GetScheduler();
                     _scheduler.Start();
 
-                    IJobDetail webappjob = JobBuilder.Create<WebAppJob>()
+                    var webappjob = JobBuilder.Create<WebAppJob>()
                         .WithIdentity("webappjob", "group1")
                         .Build();
 
-                    IJobDetail mobilejob = JobBuilder.Create<MobileJob>()
+                    var mobilejob = JobBuilder.Create<MobileJob>()
                         .WithIdentity("mobilejob", "group1")
                         .Build();
 
-                    IJobDetail closeappjob = JobBuilder.Create<CloseAppJob>()
+                    var closeappjob = JobBuilder.Create<CloseAppJob>()
                         .WithIdentity("closeappjob", "group1")
                         .Build();
 
-                    IJobDetail evoaddcardsjob = JobBuilder.Create<EvoAddCardsJob>()
+                    var evoaddcardsjob = JobBuilder.Create<EvoAddCardsJob>()
                         .WithIdentity("evoaddcardsjob", "group1")
                         .Build();
 
-                    ITrigger webapptrigger = TriggerBuilder.Create()
+                    var webapptrigger = TriggerBuilder.Create()
                         .WithIdentity("webapptrigger", "group1")
                         .WithSchedule(CronScheduleBuilder
                             .DailyAtHourAndMinute(07, 30) // 07, 30 - 24 hours format
                             .InTimeZone(TimeZoneInfo.FindSystemTimeZoneById("GMT Standard Time")))
                         .Build();
 
-                    ITrigger mobiletrigger = TriggerBuilder.Create()
+                    var mobiletrigger = TriggerBuilder.Create()
                         .WithIdentity("mobiletrigger", "group1")
                         .WithSchedule(CronScheduleBuilder
                             .DailyAtHourAndMinute(18, 00) // 18, 00 - 24 hours format 
                             .InTimeZone(TimeZoneInfo.FindSystemTimeZoneById("GMT Standard Time")))
                         .Build();
 
-                    ITrigger closeapptrigger = TriggerBuilder.Create()
+                    var closeapptrigger = TriggerBuilder.Create()
                         .WithIdentity("closeapptrigger", "group1")
                         .WithSchedule(CronScheduleBuilder
                             .DailyAtHourAndMinute(03, 15) // 03, 15 - 24 hours format 
                             .InTimeZone(TimeZoneInfo.FindSystemTimeZoneById("GMT Standard Time")))
                         .Build();
 
-                    ITrigger evoaddcardstrigger = TriggerBuilder.Create()
+                    var evoaddcardstrigger = TriggerBuilder.Create()
                         .WithIdentity("evoaddcardstrigger", "group1")
                         .WithSimpleSchedule(x => x
                             .WithIntervalInMinutes(15) // every 15 min
@@ -103,15 +102,15 @@ namespace EvFutBot
 
         private static void InitAccounts(AppVersion login)
         {
-            Random rand = new Random();
+            var rand = new Random();
             if (Environment.MachineName != DevMachine)
             {
-                int randDelay0 = rand.Next(480);
+                var randDelay0 = rand.Next(480);
                 Thread.Sleep(randDelay0*1000);
             }
 
-            Settings settings = GetSettings();
-            List<Account> accounts = GetAccounts(settings, login);
+            var settings = GetSettings();
+            var accounts = GetAccounts(settings, login);
 
             byte i = 0;
             while (accounts.Count == 0)
@@ -126,13 +125,13 @@ namespace EvFutBot
                 i++;
             }
 
-            List<Task> taskList = new List<Task>();
-            foreach (Task<bool> accountTask in accounts.Select(account => new Task<bool>(() =>
+            var taskList = new List<Task>();
+            foreach (var accountTask in accounts.Select(account => new Task<bool>(() =>
                 new Controller(account, settings).LoginAndWork().Result, TaskCreationOptions.LongRunning)))
             {
                 if (Environment.MachineName != DevMachine)
                 {
-                    int randDelay = rand.Next(60, 120);
+                    var randDelay = rand.Next(60, 120);
                     Thread.Sleep(randDelay*1000);
                 }
                 accountTask.Start();
@@ -199,7 +198,7 @@ namespace EvFutBot
 
         private static Settings GetSettings()
         {
-            Settings settings = new Settings(new byte[] {9, 9}, new byte[] {10, 10}, 85, 100, 50, 15, 4000000, 120, 100,
+            var settings = new Settings(new byte[] {9, 9}, new byte[] {10, 10}, 85, 100, 50, 15, 4000000, 120, 100,
                 3);
             if (Database.Tunnel == null) Database.SshConnect();
 
@@ -256,8 +255,8 @@ namespace EvFutBot
             if (!DevOrWork()) return;
             if (Database.Tunnel == null) Database.SshConnect();
 
-            List<Task> taskList = new List<Task>();
-            Task<bool> accountTask = new Task<bool>(() =>
+            var taskList = new List<Task>();
+            var accountTask = new Task<bool>(() =>
                 EvoCustomer.AddCardsToBuy().Result);
 
             accountTask.Start();
@@ -270,8 +269,8 @@ namespace EvFutBot
             if (!DevOrWork()) return;
             if (Database.Tunnel == null) Database.SshConnect();
 
-            List<Task> taskList = new List<Task>();
-            Task<bool> accountTask = new Task<bool>(() =>
+            var taskList = new List<Task>();
+            var accountTask = new Task<bool>(() =>
                 PlayerStatistics.CalculateAll().Result);
 
             accountTask.Start();
@@ -284,8 +283,8 @@ namespace EvFutBot
             if (!DevOrWork()) return;
             if (Database.Tunnel == null) Database.SshConnect();
 
-            List<Task> taskList = new List<Task>();
-            Task<bool> accountTask = new Task<bool>(() =>
+            var taskList = new List<Task>();
+            var accountTask = new Task<bool>(() =>
                 PlayerStatistics.UpdateBaseIds().Result);
 
             accountTask.Start();
@@ -298,8 +297,8 @@ namespace EvFutBot
             if (!DevOrWork()) return;
             if (Database.Tunnel == null) Database.SshConnect();
 
-            List<Task> taskList = new List<Task>();
-            Task<bool> accountTask = new Task<bool>(() =>
+            var taskList = new List<Task>();
+            var accountTask = new Task<bool>(() =>
                 PlayerWeights.AddAll().Result);
 
             accountTask.Start();
