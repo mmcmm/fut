@@ -17,6 +17,14 @@ namespace EvFutBot.Utilities
 
         public static void LogException(string message, string details = "", string account = "")
         {
+            // we don't need to log to the db dev exceptiobs.
+            if (Environment.MachineName == Program.DevMachine)
+            {
+                Console.WriteLine(message);
+                Console.WriteLine(details);
+                return;
+            }
+
             try
             {
                 Database.Log(message, account, Environment.MachineName, details);

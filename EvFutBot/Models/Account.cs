@@ -614,9 +614,7 @@ namespace EvFutBot.Models
             }
 
             // clear any useless cards in the account that clog the tradepile
-            foreach (
-                var card in
-                    tradePileList.AuctionInfo.Where(
+            foreach (var card in tradePileList.AuctionInfo.Where(
                         card => (card.ItemData.ItemType == "player" && card.ItemData.Rating <= 70)
                                 || card.ItemData.ItemType != "player"))
             {
@@ -995,11 +993,9 @@ namespace EvFutBot.Models
             }
 
             // move won bid items and skip bugged cards.
-            foreach (
-                var watchCard in
-                    watchList.AuctionInfo.Where(
-                        watchCard => watchCard.TradeState == "closed" && watchCard.BidState != "outbid")
-                        .Where(watchCard => !BuggedCardsWl.Contains(watchCard.ItemData.Id)))
+            foreach (var watchCard in watchList.AuctionInfo.Where(
+                watchCard => watchCard.TradeState == "closed" && watchCard.BidState != "outbid")
+                .Where(watchCard => !BuggedCardsWl.Contains(watchCard.ItemData.Id)))
             {
                 try
                 {
@@ -1047,9 +1043,8 @@ namespace EvFutBot.Models
             }
 
             // remove bugged expired cards that doesn't show outbid
-            var expiredAuctionsNone =
-                watchList.AuctionInfo.Where(
-                    watchCard => watchCard.BidState == "none" && watchCard.TradeState == "expired").ToList();
+            var expiredAuctionsNone = watchList.AuctionInfo.Where(
+                watchCard => watchCard.BidState == "none" && watchCard.TradeState == "expired").ToList();
             if (expiredAuctionsNone.Count != 0)
             {
                 try
@@ -1076,19 +1071,15 @@ namespace EvFutBot.Models
             }
 
             // bugged items. 
-            if (
-                watchList.AuctionInfo.Any(
-                    watchCard => watchCard.ItemData.ItemState == "invalid" && watchCard.TradeState == "expired"))
+            if (watchList.AuctionInfo.Any(
+                watchCard => watchCard.ItemData.ItemState == "invalid" && watchCard.TradeState == "expired"))
             {
                 Logger.LogException("Invalid item(s)!", "", Email);
             }
             // move the overflow cards
-            foreach (
-                var watchCard in
-                    watchList.AuctionInfo.Where(
-                        watchCard =>
-                            watchCard.TradeState == "expired" && watchCard.ItemData.ItemState != "invalid" &&
-                            watchCard.BidState != "none"))
+            foreach (var watchCard in watchList.AuctionInfo.Where(
+                watchCard => watchCard.TradeState == "expired" && watchCard.ItemData.ItemState != "invalid"
+                             && watchCard.BidState != "none"))
             {
                 try
                 {
@@ -1186,11 +1177,9 @@ namespace EvFutBot.Models
             {
                 await Task.Delay(settings.RmpDelayLow);
                 var storeResponse = await _utClient.GetPackDetailsAsync();
-                foreach (var packDetail in storeResponse.Purchase
-                    .Where(p => p.Coins == 0 && p.FifaCashPrice == 0))
+                foreach (var pacDetails in storeResponse.Purchase.Where(p => p.Coins == 0 && p.FifaCashPrice == 0)
+                    .Select(packDetail => new PackDetails(packDetail.Id, Currency.MTX, 0, true)))
                 {
-                    var pacDetails = new PackDetails(packDetail.Id, Currency.MTX, 0, true);
-
                     await Task.Delay(settings.RmpDelayLow);
                     var buyPackResponse = await _utClient.BuyPackAsync(pacDetails);
 

@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Net;
-using System.Net.Sockets;
-using System.Reflection;
 using Renci.SshNet;
 
 namespace EvFutBot.Utilities

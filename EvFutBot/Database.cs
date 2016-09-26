@@ -117,7 +117,8 @@ namespace EvFutBot
                 }
 
                 cmd.CommandText = $"SELECT asset_id FROM players WHERE std_price{platform}<={maxPrice} " +
-                                  $"AND std_price{platform}>0 AND (platform='{platformList}' OR platform='All') LIMIT 0, 2000";
+                                  $"AND std_price{platform}>0 AND (platform='{platformList}' OR platform='All') " +
+                                  $"AND status='{Player.Statuses.Active}' LIMIT 0, 2000";
 
                 IDataReader reader = cmd.ExecuteReader();
                 var assetIds = new List<uint>();
