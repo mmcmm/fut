@@ -22,7 +22,7 @@ namespace EvFutBot.Models
 {
     public partial class Account
     {
-        public const uint SmallAccount = 3000;
+        public const uint SmallAccount = 4000;
         private const byte TradePileMax = 30;
         private const byte WatchListMax = 50;
         private const int QuickSellLimit = 900;
@@ -362,7 +362,6 @@ namespace EvFutBot.Models
                 await HandleException(ex, settings.SecurityDelay, Email);
                 return false;
             }
-            Credits = searchResponse.Credits;
 
             foreach (var auction in searchResponse.AuctionInfo.Where(
                 auction => auction.ItemData.AssetId == player.BaseId && auction.ItemData.Rating == player.Rating))
@@ -667,8 +666,7 @@ namespace EvFutBot.Models
                     if (sellPrice < 250) sellPrice = 250; // contracts and cheap customer cards
 
                     await Task.Delay(settings.RmpDelay);
-                    await
-                        _utClient.ListAuctionAsync(new AuctionDetails(expiredCard.ItemData.Id,
+                    await _utClient.ListAuctionAsync(new AuctionDetails(expiredCard.ItemData.Id,
                             GetAuctionDuration(startedAt, settings.RunforHours, Login),
                             CalculateBidPrice(sellPrice, settings.SellPercent), sellPrice));
                 }

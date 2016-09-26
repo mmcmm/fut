@@ -182,7 +182,8 @@ namespace EvFutBot
                 }
 
                 var ordering = reverse ? "DESC" : "ASC";
-                cmd.CommandText = $"SELECT * FROM players WHERE platform='{platformList}' OR platform='All' " +
+                cmd.CommandText = $"SELECT * FROM players WHERE status='{Player.Statuses.Active}' " +
+                                  $"AND (platform='{platformList}' OR platform='All') " +
                                   $"ORDER BY asset_id {ordering} LIMIT 0, 2000";
                 IDataReader reader = cmd.ExecuteReader();
                 return Factories.MakePlayers(reader);

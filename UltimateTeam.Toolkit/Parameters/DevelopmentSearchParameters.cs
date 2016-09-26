@@ -30,6 +30,8 @@ namespace UltimateTeam.Toolkit.Parameters
             if (MaxBid > 0)
                 uriString += "&macr=" + MaxBid;
 
+            if (DefinitionId > 0)
+                uriString += "&definitionId=" + DefinitionId;
 
             return uriString;
         }

@@ -38,6 +38,8 @@
 
         public long ResourceId { get; set; }
 
+        public long DefinitionId { get; set; }
+
         public byte PageSize { get; set; }
 
         protected SearchParameters(ResourceType resourceType)

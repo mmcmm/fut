@@ -115,7 +115,6 @@ namespace EvFutBot.Models
                 return false;
             }
 
-            Credits = searchResponse.Credits;
             foreach (var auction in searchResponse.AuctionInfo.Where(
                 auction => auction.TradeId == card.TradeId))
             {
