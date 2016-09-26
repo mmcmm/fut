@@ -22,12 +22,7 @@ namespace EvFutBot.Utilities
                 _client.AddForwardedPort(_port);
                 _port.Start();
 
-                // Hack to allow dynamic local ports, ForwardedPortLocal should expose _listener.LocalEndpoint
-                var memberInfo = typeof (ForwardedPortLocal).GetField("_listener",
-                    BindingFlags.Instance | BindingFlags.NonPublic);
-                if (memberInfo == null) return;
-                var listener = (TcpListener) memberInfo.GetValue(_port);
-                LocalPort = ((IPEndPoint) listener.LocalEndpoint).Port;
+                LocalPort = _port.BoundPort;
             }
             catch (Exception ex)
             {
@@ -36,7 +31,7 @@ namespace EvFutBot.Utilities
             }
         }
 
-        public int LocalPort { get; }
+        public uint LocalPort { get; }
 
         public void Dispose()
         {

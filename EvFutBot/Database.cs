@@ -765,7 +765,7 @@ namespace EvFutBot
                 Database = DbName,
                 UserID = DbUser,
                 Password = DbPassword,
-                Port = checked((uint) Tunnel.LocalPort)
+                Port = Tunnel.LocalPort
             };
         }
     }
