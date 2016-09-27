@@ -22,7 +22,7 @@ namespace EvFutBot.Models
 {
     public partial class Account
     {
-        public const uint SmallAccount = 4000;
+        public const uint SmallAccount = 4000; 
         private const byte TradePileMax = 30;
         private const byte WatchListMax = 50;
         private const int QuickSellLimit = 900;
@@ -255,6 +255,7 @@ namespace EvFutBot.Models
                         Credits = await ClearTradePile(settings, _startedAt);
                         Update(panel, Credits, Panel.Statuses.Working, settings.RmpDelay);
 
+                        // do fitness round here.
                         players = GetPotentialPlayers(settings.Batch, settings.MaxCardCost); // new players
                         while (players.Count == 0) // a fail safe
                         {
@@ -390,8 +391,7 @@ namespace EvFutBot.Models
                     if (boughtAction != null && boughtAction.TradeState == "closed")
                     {
                         await Task.Delay(settings.RmpDelay);
-                        var tradePileResponse =
-                            await _utClient.SendItemToTradePileAsync(boughtAction.ItemData);
+                        var tradePileResponse = await _utClient.SendItemToTradePileAsync(boughtAction.ItemData);
                         var tradeItem = tradePileResponse.ItemData.FirstOrDefault();
 
                         if (tradeItem != null)
@@ -613,9 +613,10 @@ namespace EvFutBot.Models
             }
 
             // clear any useless cards in the account that clog the tradepile
+            string[] protectedTypes = {"player", "contract", "health"};
             foreach (var card in tradePileList.AuctionInfo.Where(
                 card => (card.ItemData.ItemType == "player" && card.ItemData.Rating <= 70)
-                        || card.ItemData.ItemType != "player"))
+                        || !protectedTypes.Contains(card.ItemData.ItemType)))
             {
                 try
                 {

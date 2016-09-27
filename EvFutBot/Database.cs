@@ -557,7 +557,7 @@ namespace EvFutBot
             {
                 connection.Open();
 
-                cmd.CommandText = "UPDATE players SET base_id=@base_id, rating=@rating WHERE asset_id=@asset_id ";
+                cmd.CommandText = "UPDATE players SET base_id=@base_id, rating=@rating, status='Active' WHERE asset_id=@asset_id ";
                 cmd.Prepare();
                 cmd.Parameters.AddWithValue("@base_id", baseId);
                 cmd.Parameters.AddWithValue("@asset_id", assetId);

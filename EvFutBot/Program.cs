@@ -26,11 +26,11 @@ namespace EvFutBot
         {
             if (Environment.MachineName == DevMachine)
             {
-//                InitUpdateBaseIds();
+                InitUpdateBaseIds();
 //                InitStatistics();
 //                InitAddNewPlayers();
 //                InitEvoCustomerCards();
-                InitAccounts(AppVersion.WebApp);
+//                InitAccounts(AppVersion.WebApp);
             }
             else
             {
