@@ -78,7 +78,7 @@ namespace EvFutBot.Models
 
                 try
                 {
-                    await Task.Delay(Convert.ToInt32(settings.PreBidDelay));
+                    await Task.Delay(settings.PreBidDelay);
                     var placeBid = await _utClient.PlaceBidAsync(auction, maxPrice);
                     if (placeBid.AuctionInfo == null) continue;
                     var boughtAction = placeBid.AuctionInfo.FirstOrDefault();
@@ -93,10 +93,9 @@ namespace EvFutBot.Models
                         if (tradeItem != null)
                         {
                             await Task.Delay(settings.RmpDelay);
-                            await
-                                _utClient.ListAuctionAsync(new AuctionDetails(boughtAction.ItemData.Id,
-                                    GetAuctionDuration(startedAt, settings.RunforHours, Login),
-                                    CalculateBidPrice(sellPrice, settings.SellPercent), sellPrice));
+                            await _utClient.ListAuctionAsync(new AuctionDetails(boughtAction.ItemData.Id,
+                                GetAuctionDuration(startedAt, settings.RunforHours, Login),
+                                CalculateBidPrice(sellPrice, settings.SellPercent), sellPrice));
 
                             Logger.LogTransaction(Email, boughtAction.ItemData.LastSalePrice,
                                 boughtAction.ItemData.Rating, boughtAction.ItemData.AssetId,
