@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Linq;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using EvFutBot.Utilities;
+using MySql.Data.MySqlClient;
+using Renci.SshNet.Common;
 using UltimateTeam.Toolkit.Exceptions;
 using UltimateTeam.Toolkit.Models;
 using UltimateTeam.Toolkit.Parameters;
@@ -11,6 +14,8 @@ namespace EvFutBot.Models
 {
     public partial class Account
     {
+        public const uint FitnessTeamDefId = 5002006;
+
         public async Task<bool> SearchAndBidPContracts(Settings settings, DateTime startedAt, byte page)
         {
             const uint sellPrice = 250;
@@ -32,6 +37,21 @@ namespace EvFutBot.Models
             {
                 await Task.Delay(settings.RmpDelay);
                 searchResponse = await _utClient.SearchAsync(searchParameters);
+
+                while (searchResponse.AuctionInfo.Count >= (searchParameters.PageSize == 15 ? 16 : 13))
+                {
+                    if (searchResponse.AuctionInfo.Any(c => c.BuyNowPrice <= maxPrice))
+                    {
+                        break;
+                    }
+                    searchParameters.Page++;
+                    searchParameters.PageSize = 12;
+                    await Task.Delay(settings.RmpDelay);
+                    searchResponse = await _utClient.SearchAsync(searchParameters);
+                }
+                // we also sort them for buying
+                searchResponse.AuctionInfo.Sort(
+                    (x, y) => Convert.ToInt32(x.BuyNowPrice) - Convert.ToInt32(y.BuyNowPrice));
             }
             catch (ExpiredSessionException ex)
             {
@@ -62,15 +82,13 @@ namespace EvFutBot.Models
             foreach (var auction in searchResponse.AuctionInfo
                 .Where(auction => auction.ItemData.ResourceId == -1874047186))
             {
-                if (auction.Expires <= settings.RmpDelay/1000/6 || auction.Expires >= 6*60) continue;
-                var nextbid = auction.CalculateBid();
-                if (nextbid > maxPrice) continue;
-                maxPrice = nextbid;
+                if (auction.BuyNowPrice > maxPrice) break;
+                maxPrice = auction.BuyNowPrice <= maxPrice ? auction.BuyNowPrice : maxPrice;
                 if (maxPrice > Credits) continue;
 
                 try
                 {
-                    await Task.Delay(Convert.ToInt32(settings.PreBidDelay));
+                    await Task.Delay(settings.PreBidDelay);
                     var placeBid = await _utClient.PlaceBidAsync(auction, maxPrice);
                     if (placeBid.AuctionInfo == null) continue;
                     var boughtAction = placeBid.AuctionInfo.FirstOrDefault();
@@ -141,20 +159,24 @@ namespace EvFutBot.Models
 
         public async Task<bool> SearchAndBuyFitness(Settings settings, DateTime startedAt)
         {
-//            uint fitnessStdPrice = GetConsumablePrice(Platform, definitionId);
-            uint fitnessStdPrice = 900;
-            var sellPrice = GetEaPrice(fitnessStdPrice, settings.SellPercent);
-            var maxPrice = GetEaPrice(fitnessStdPrice, settings.BinPercent);
+            var fitnessStdPrice = GetConsumablePrice(Platform, FitnessTeamDefId); // fitness special +5%
+            var sellPrice = GetEaPrice(fitnessStdPrice, Convert.ToByte(settings.SellPercent + 5));
+            var maxPrice = GetEaPrice(fitnessStdPrice, Convert.ToByte(settings.BinPercent + 5));
+            var minPrice = GetEaPrice(CalculateMinPrice(maxPrice), 100);
             if (maxPrice > Credits) return false;
 
             AuctionResponse searchResponse;
+            var prevBid = AuctionInfo.CalculatePreviousBid(maxPrice);
             var searchParameters = new DevelopmentSearchParameters
             {
                 Page = 1,
                 DevelopmentType = DevelopmentType.Fitness,
                 Level = Level.Gold,
-                MaxBuy = maxPrice,
-                DefinitionId = 5002006
+                MaxBuy = sellPrice, // we use sell price due to ea crazyness 
+                MaxBid = prevBid,
+                MinBuy = minPrice,
+                PageSize = 15,
+                DefinitionId = FitnessTeamDefId
             };
 
             try
@@ -189,7 +211,6 @@ namespace EvFutBot.Models
             }
 
             searchResponse.AuctionInfo.Sort((x, y) => Convert.ToInt32(x.BuyNowPrice) - Convert.ToInt32(y.BuyNowPrice));
-
             foreach (var auction in searchResponse
                 .AuctionInfo.Where(auction => auction.ItemData.ResourceId == -1874046186))
             {
@@ -198,7 +219,7 @@ namespace EvFutBot.Models
 
                 try
                 {
-                    await Task.Delay(Convert.ToInt32(settings.PreBidDelay));
+                    await Task.Delay(settings.PreBidDelay);
                     var placeBid = await _utClient.PlaceBidAsync(auction, maxPrice);
                     if (placeBid.AuctionInfo == null) continue;
                     var boughtAction = placeBid.AuctionInfo.FirstOrDefault();
@@ -213,8 +234,7 @@ namespace EvFutBot.Models
                         if (tradeItem != null)
                         {
                             await Task.Delay(settings.RmpDelay);
-                            await
-                                _utClient.ListAuctionAsync(new AuctionDetails(boughtAction.ItemData.Id,
+                            await _utClient.ListAuctionAsync(new AuctionDetails(boughtAction.ItemData.Id,
                                     GetAuctionDuration(startedAt, settings.RunforHours, Login),
                                     CalculateBidPrice(sellPrice, settings.SellPercent), sellPrice));
 
@@ -264,6 +284,59 @@ namespace EvFutBot.Models
                 }
             }
             return true;
+        }
+
+        public uint GetConsumablePrice(Platform platform, uint definitionId)
+        {
+            try
+            {
+                return Database.GetConsumablePrice(definitionId, platform.ToString());
+            }
+            catch (SshException)
+            {
+                try
+                {
+                    Thread.Sleep(30*1000);
+                    Database.SshConnect();
+                    return Database.GetConsumablePrice(definitionId, platform.ToString());
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogException(ex.Message, ex.ToString());
+                    return 150;
+                }
+            }
+            catch (MySqlException)
+            {
+                try
+                {
+                    Thread.Sleep(30*1000);
+                    return Database.GetConsumablePrice(definitionId, platform.ToString());
+                }
+                catch (MySqlException)
+                {
+                    try
+                    {
+                        Thread.Sleep(30*1000);
+                        return Database.GetConsumablePrice(definitionId, platform.ToString());
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogException(ex.Message, ex.ToString());
+                        return 150;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogException(ex.Message, ex.ToString());
+                    return 150;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogException(ex.Message, ex.ToString());
+                return 150;
+            }
         }
     }
 }

@@ -26,11 +26,10 @@ namespace EvFutBot
         {
             if (Environment.MachineName == DevMachine)
             {
-                InitUpdateBaseIds();
+//                InitUpdateBaseIds();
 //                InitStatistics();
-//                InitAddNewPlayers();
 //                InitEvoCustomerCards();
-//                InitAccounts(AppVersion.WebApp);
+                InitAccounts(AppVersion.WebApp);
             }
             else
             {
@@ -105,7 +104,8 @@ namespace EvFutBot
             var rand = new Random();
             if (Environment.MachineName != DevMachine)
             {
-                var randDelay0 = rand.Next(480);
+                // ramdom delay so we don't bomb the db server
+                var randDelay0 = rand.Next(640);
                 Thread.Sleep(randDelay0*1000);
             }
 

@@ -129,7 +129,7 @@ namespace EvFutBot.Models
                     try
                     {
                         if (auction.TradeId != card.TradeId) continue;
-                        await Task.Delay(Convert.ToInt32(settings.PreBidDelay));
+                        await Task.Delay(settings.PreBidDelay);
                         placeBid = await _utClient.PlaceBidAsync(auction, card.Bin);
                         if (placeBid.AuctionInfo == null)
                         {

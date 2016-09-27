@@ -23,6 +23,8 @@ namespace EvFutBot.Models
                 var startedAt = Convert.ToDateTime(panel.StartedAt);
                 await ClearGiftList(settings);
                 var reverse = _id > 4; // we get players in reverse
+
+                await SearchAndPriceFitness(settings);
                 var players = GetPlatformPlayers(Platform, reverse);
 
                 while (true) // main loop
@@ -38,8 +40,8 @@ namespace EvFutBot.Models
                         }
                         Update(panel, Credits, Panel.Statuses.Working, settings.RmpDelay);
 
-                        // we get new players
-                        await Task.Delay(settings.RmpDelayLow);
+                        // we price fitness and get new players
+                        await SearchAndPriceFitness(settings);                     
                         players = GetPlatformPlayers(Platform, reverse);
                     }
                     if (players.Count == 0) continue;
@@ -170,6 +172,125 @@ namespace EvFutBot.Models
             SavePlayerPrice(player.AssetId, lowestBinAvg, Platform.ToString());
 
             return true;
+        }
+
+        public async Task<bool> SearchAndPriceFitness(Settings settings)
+        {
+            var maxPrice = GetEaPrice(GetConsumablePrice(Platform, FitnessTeamDefId), 100);
+            var lowestBinAvg = uint.MaxValue;
+
+            AuctionResponse searchResponse;
+            var searchParameters = new DevelopmentSearchParameters
+            {
+                Page = 1,
+                DevelopmentType = DevelopmentType.Fitness,
+                Level = Level.Gold,
+                MaxBuy = maxPrice,
+                DefinitionId = FitnessTeamDefId
+            };
+
+            try
+            {
+                await Task.Delay(settings.RmpDelayPrices);
+                searchResponse = await _utClient.SearchAsync(searchParameters);
+                while (searchResponse.AuctionInfo.Count == 16)
+                {
+                    searchParameters.MaxBuy = AuctionInfo.CalculatePreviousBid(searchParameters.MaxBuy);
+                    await Task.Delay(settings.RmpDelayPrices);
+                    searchResponse = await _utClient.SearchAsync(searchParameters);
+                }
+                while (searchResponse.AuctionInfo.Count < settings.LowestBinNr)
+                {
+                    searchParameters.MaxBuy = AuctionInfo.CalculateNextBid(searchParameters.MaxBuy);
+                    await Task.Delay(settings.RmpDelayPrices);
+                    searchResponse = await _utClient.SearchAsync(searchParameters);
+                }
+            }
+            catch (ExpiredSessionException ex)
+            {
+                await HandleException(ex, settings.SecurityDelay, Email);
+                return false;
+            }
+            catch (ArgumentException ex)
+            {
+                await HandleException(ex, settings.SecurityDelay, settings.RunforHours, Email);
+                return false;
+            }
+            catch (CaptchaTriggeredException ex)
+            {
+                await HandleException(ex, Email);
+                return false;
+            }
+            catch (HttpRequestException ex)
+            {
+                await HandleException(ex, settings.SecurityDelay, Email);
+                return false;
+            }
+            catch (Exception ex)
+            {
+                await HandleException(ex, settings.SecurityDelay, Email);
+                return false;
+            }
+
+            searchResponse.AuctionInfo.Sort((x, y) => Convert.ToInt32(x.BuyNowPrice) - Convert.ToInt32(y.BuyNowPrice));
+            for (var i = 0; i < settings.LowestBinNr; i++)
+            {
+                lowestBinAvg += searchResponse.AuctionInfo[i].BuyNowPrice;
+            }
+
+            lowestBinAvg = lowestBinAvg/settings.LowestBinNr;
+            SaveConsumablePrice(Platform, FitnessTeamDefId, lowestBinAvg);
+
+            return true;
+        }
+
+        public void SaveConsumablePrice(Platform platform, uint definitionId, uint price)
+        {
+            try
+            {
+                Database.SaveConsumablePrice(definitionId, platform.ToString(), price);
+            }
+            catch (SshException)
+            {
+                try
+                {
+                    Thread.Sleep(30*1000);
+                    Database.SshConnect();
+                    Database.SaveConsumablePrice(definitionId, platform.ToString(), price);
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogException(ex.Message, ex.ToString());
+                }
+            }
+            catch (MySqlException)
+            {
+                try
+                {
+                    Thread.Sleep(30*1000);
+                    Database.SaveConsumablePrice(definitionId, platform.ToString(), price);
+                }
+                catch (MySqlException)
+                {
+                    try
+                    {
+                        Thread.Sleep(30*1000);
+                        Database.SaveConsumablePrice(definitionId, platform.ToString(), price);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogException(ex.Message, ex.ToString());
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogException(ex.Message, ex.ToString());
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogException(ex.Message, ex.ToString());
+            }
         }
 
         public void SavePlayerPrice(uint assetId, uint price, string platform)
@@ -339,10 +460,10 @@ namespace EvFutBot.Models
             return Convert.ToUInt32(minPrice);
         }
 
-        public static byte CalculatePercent(uint maxPrice, bool bid, Settings settings)
+        public static byte CalculatePercent(uint maxPrice, Settings settings)
         {
-            var percent = bid ? settings.BidPercent : settings.BinPercent;
-            if (maxPrice >= 2600) percent += 5;
+            var percent = settings.BinPercent;
+            if (maxPrice >= 4600) percent += 5;
 
             return percent;
         }

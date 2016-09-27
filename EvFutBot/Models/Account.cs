@@ -22,7 +22,7 @@ namespace EvFutBot.Models
 {
     public partial class Account
     {
-        public const uint SmallAccount = 4000; 
+        public const uint SmallAccount = 1000;
         private const byte TradePileMax = 30;
         private const byte WatchListMax = 50;
         private const int QuickSellLimit = 900;
@@ -255,7 +255,8 @@ namespace EvFutBot.Models
                         Credits = await ClearTradePile(settings, _startedAt);
                         Update(panel, Credits, Panel.Statuses.Working, settings.RmpDelay);
 
-                        // do fitness round here.
+                        // we get new players and run fitness round here.
+                        if (Credits >= SmallAccount) await SearchAndBuyFitness(settings, _startedAt);
                         players = GetPotentialPlayers(settings.Batch, settings.MaxCardCost); // new players
                         while (players.Count == 0) // a fail safe
                         {
@@ -264,7 +265,7 @@ namespace EvFutBot.Models
                         }
                     }
                     // less for 360
-                    if (Credits <= SmallAccount && !(Platform == Platform.Xbox360 && Credits >= 1500))
+                    if (Credits <= SmallAccount && !(Platform == Platform.Xbox360 && Credits >= 2000))
                     {
                         var tradePileSize = await GetTradePileSize(settings);
                         var watchListSize = await GetWatchListSize(settings);
@@ -287,18 +288,18 @@ namespace EvFutBot.Models
                     }
                     else
                     {
-                        await SearchAndBuy(players.First(), settings, false, _startedAt);
+                        await SearchAndBuy(players.First(), settings, _startedAt);
                     }
                     players.RemoveAt(0);
                 }
             });
         }
 
-        public async Task<bool> SearchAndBuy(Player player, Settings settings, bool bid, DateTime startedAt)
+        public async Task<bool> SearchAndBuy(Player player, Settings settings, DateTime startedAt)
         {
             var stdPrice = player.GetStdPrice(Platform);
             var sellPrice = GetEaPrice(stdPrice, settings.SellPercent);
-            var maxPrice = GetEaPrice(stdPrice, CalculatePercent(stdPrice, bid, settings));
+            var maxPrice = GetEaPrice(stdPrice, CalculatePercent(stdPrice, settings));
             var minPrice = GetEaPrice(CalculateMinPrice(maxPrice), 100);
             if (maxPrice > Credits) return false;
 
@@ -309,7 +310,7 @@ namespace EvFutBot.Models
                 Page = 1,
                 Level = player.Level,
                 ResourceId = player.AssetId,
-                MaxBuy = bid ? 0 : sellPrice, // we use sell price due to ea crazyness 
+                MaxBuy = sellPrice, // we use sell price due to ea crazyness 
                 MaxBid = prevBid,
                 MinBuy = minPrice,
                 PageSize = 15
@@ -320,23 +321,20 @@ namespace EvFutBot.Models
                 await Task.Delay(settings.RmpDelay);
                 searchResponse = await _utClient.SearchAsync(searchParameters);
 
-                if (!bid)
+                while (searchResponse.AuctionInfo.Count >= (searchParameters.PageSize == 15 ? 16 : 13))
                 {
-                    while (searchResponse.AuctionInfo.Count >= (searchParameters.PageSize == 15 ? 16 : 13))
+                    if (searchResponse.AuctionInfo.Any(c => c.BuyNowPrice <= maxPrice))
                     {
-                        if (searchResponse.AuctionInfo.Any(c => c.BuyNowPrice <= maxPrice))
-                        {
-                            break;
-                        }
-                        searchParameters.Page++;
-                        searchParameters.PageSize = 12;
-                        await Task.Delay(settings.RmpDelay);
-                        searchResponse = await _utClient.SearchAsync(searchParameters);
+                        break;
                     }
-                    // we also sort them for buying
-                    searchResponse.AuctionInfo.Sort(
-                        (x, y) => Convert.ToInt32(x.BuyNowPrice) - Convert.ToInt32(y.BuyNowPrice));
+                    searchParameters.Page++;
+                    searchParameters.PageSize = 12;
+                    await Task.Delay(settings.RmpDelay);
+                    searchResponse = await _utClient.SearchAsync(searchParameters);
                 }
+                // we also sort them for buying
+                searchResponse.AuctionInfo.Sort(
+                    (x, y) => Convert.ToInt32(x.BuyNowPrice) - Convert.ToInt32(y.BuyNowPrice));
             }
             catch (ExpiredSessionException ex)
             {
@@ -367,18 +365,8 @@ namespace EvFutBot.Models
             foreach (var auction in searchResponse.AuctionInfo.Where(
                 auction => auction.ItemData.AssetId == player.BaseId && auction.ItemData.Rating == player.Rating))
             {
-                if (!bid)
-                {
-                    if (auction.BuyNowPrice > maxPrice) break;
-                    maxPrice = auction.BuyNowPrice <= maxPrice ? auction.BuyNowPrice : maxPrice;
-                }
-                else
-                {
-                    if (auction.Expires <= settings.PreBidDelay || auction.Expires > 5*60) continue;
-                    var nextbid = auction.CalculateBid();
-                    if (nextbid > maxPrice) continue;
-                    if (auction.Expires <= 30) maxPrice = nextbid;
-                }
+                if (auction.BuyNowPrice > maxPrice) break;
+                maxPrice = auction.BuyNowPrice <= maxPrice ? auction.BuyNowPrice : maxPrice;
                 if (maxPrice > Credits) continue;
 
                 try
@@ -679,7 +667,6 @@ namespace EvFutBot.Models
                         {
                             //ignored
                         }
-                        
                     }
                     if (sellPrice < 250) sellPrice = 250; // contracts and cheap customer cards
 
@@ -733,7 +720,7 @@ namespace EvFutBot.Models
                         CalculateBidPrice(sellPrice, settings.SellPercent), sellPrice));
                 }
                 catch (PermissionDeniedException ex)
-                {              
+                {
                     HandleException(ex, settings.SecurityDelay, Email, true);
                     break;
                 }
