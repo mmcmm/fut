@@ -15,9 +15,12 @@ namespace EvFutBot.Models
     public partial class Account
     {
         public const uint FitnessTeamDefId = 5002006;
+        public const int FitnessResourceId = -1874046186;
 
         public async Task<bool> SearchAndBidPContracts(Settings settings, DateTime startedAt, byte page)
         {
+            const int resourceId = -1874047186;
+            const uint definitionId = 5001006;
             const uint sellPrice = 250;
             uint maxPrice = 150;
             if (maxPrice > Credits) return false;
@@ -30,28 +33,13 @@ namespace EvFutBot.Models
                 Level = Level.Gold,
                 MaxBid = maxPrice,
                 PageSize = 15,
-                DefinitionId = 5001006
+                DefinitionId = definitionId
             };
 
             try
             {
                 await Task.Delay(settings.RmpDelay);
                 searchResponse = await _utClient.SearchAsync(searchParameters);
-
-                while (searchResponse.AuctionInfo.Count >= (searchParameters.PageSize == 15 ? 16 : 13))
-                {
-                    if (searchResponse.AuctionInfo.Any(c => c.BuyNowPrice <= maxPrice))
-                    {
-                        break;
-                    }
-                    searchParameters.Page++;
-                    searchParameters.PageSize = 12;
-                    await Task.Delay(settings.RmpDelay);
-                    searchResponse = await _utClient.SearchAsync(searchParameters);
-                }
-                // we also sort them for buying
-                searchResponse.AuctionInfo.Sort(
-                    (x, y) => Convert.ToInt32(x.BuyNowPrice) - Convert.ToInt32(y.BuyNowPrice));
             }
             catch (ExpiredSessionException ex)
             {
@@ -80,15 +68,17 @@ namespace EvFutBot.Models
             }
 
             foreach (var auction in searchResponse.AuctionInfo
-                .Where(auction => auction.ItemData.ResourceId == -1874047186))
+                .Where(auction => auction.ItemData.ResourceId == resourceId))
             {
-                if (auction.BuyNowPrice > maxPrice) break;
-                maxPrice = auction.BuyNowPrice <= maxPrice ? auction.BuyNowPrice : maxPrice;
+                if (auction.Expires <= settings.RmpDelay/1000/6 || auction.Expires >= 6*60) continue;
+                var nextbid = auction.CalculateBid();
+                if (nextbid > maxPrice) continue;
+                maxPrice = nextbid;
                 if (maxPrice > Credits) continue;
 
                 try
                 {
-                    await Task.Delay(settings.PreBidDelay);
+                    await Task.Delay(Convert.ToInt32(settings.PreBidDelay));
                     var placeBid = await _utClient.PlaceBidAsync(auction, maxPrice);
                     if (placeBid.AuctionInfo == null) continue;
                     var boughtAction = placeBid.AuctionInfo.FirstOrDefault();
@@ -156,7 +146,6 @@ namespace EvFutBot.Models
             return true;
         }
 
-
         public async Task<bool> SearchAndBuyFitness(Settings settings, DateTime startedAt)
         {
             var fitnessStdPrice = GetConsumablePrice(Platform, FitnessTeamDefId); // fitness special +5%
@@ -183,6 +172,21 @@ namespace EvFutBot.Models
             {
                 await Task.Delay(settings.RmpDelay);
                 searchResponse = await _utClient.SearchAsync(searchParameters);
+
+                while (searchResponse.AuctionInfo.Count >= (searchParameters.PageSize == 15 ? 16 : 13))
+                {
+                    if (searchResponse.AuctionInfo.Any(c => c.BuyNowPrice <= maxPrice))
+                    {
+                        break;
+                    }
+                    searchParameters.Page++;
+                    searchParameters.PageSize = 12;
+                    await Task.Delay(settings.RmpDelay);
+                    searchResponse = await _utClient.SearchAsync(searchParameters);
+                }
+                // we also sort them for buying
+                searchResponse.AuctionInfo.Sort(
+                    (x, y) => Convert.ToInt32(x.BuyNowPrice) - Convert.ToInt32(y.BuyNowPrice));
             }
             catch (ExpiredSessionException ex)
             {
@@ -210,10 +214,10 @@ namespace EvFutBot.Models
                 return false;
             }
 
-            searchResponse.AuctionInfo.Sort((x, y) => Convert.ToInt32(x.BuyNowPrice) - Convert.ToInt32(y.BuyNowPrice));
             foreach (var auction in searchResponse
                 .AuctionInfo.Where(auction => auction.ItemData.ResourceId == -1874046186))
             {
+                if (auction.BuyNowPrice > maxPrice) break;
                 maxPrice = auction.BuyNowPrice <= maxPrice ? auction.BuyNowPrice : maxPrice;
                 if (maxPrice > Credits) continue;
 
@@ -227,16 +231,15 @@ namespace EvFutBot.Models
                     if (boughtAction != null && boughtAction.TradeState == "closed")
                     {
                         await Task.Delay(settings.RmpDelay);
-                        var tradePileResponse =
-                            await _utClient.SendItemToTradePileAsync(boughtAction.ItemData);
+                        var tradePileResponse = await _utClient.SendItemToTradePileAsync(boughtAction.ItemData);
                         var tradeItem = tradePileResponse.ItemData.FirstOrDefault();
 
                         if (tradeItem != null)
                         {
                             await Task.Delay(settings.RmpDelay);
                             await _utClient.ListAuctionAsync(new AuctionDetails(boughtAction.ItemData.Id,
-                                    GetAuctionDuration(startedAt, settings.RunforHours, Login),
-                                    CalculateBidPrice(sellPrice, settings.SellPercent), sellPrice));
+                                GetAuctionDuration(startedAt, settings.RunforHours, Login),
+                                CalculateBidPrice(sellPrice, settings.SellPercent), sellPrice));
 
                             Logger.LogTransaction(Email, boughtAction.ItemData.LastSalePrice,
                                 boughtAction.ItemData.Rating, boughtAction.ItemData.AssetId,

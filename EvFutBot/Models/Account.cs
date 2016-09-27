@@ -22,7 +22,7 @@ namespace EvFutBot.Models
 {
     public partial class Account
     {
-        public const uint SmallAccount = 1000;
+        public const uint SmallAccount = 1000; //todo
         private const byte TradePileMax = 30;
         private const byte WatchListMax = 50;
         private const int QuickSellLimit = 900;
