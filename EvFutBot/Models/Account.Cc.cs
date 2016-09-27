@@ -198,7 +198,7 @@ namespace EvFutBot.Models
                                     await Task.Delay(settings.RmpDelayLow);
                                     await _utClient.QuickSellItemAsync(boughtAction.ItemData.Id);
                                 }
-                                catch (PermissionDeniedException ex)
+                                catch (Exception ex)
                                 {
                                     try
                                     {
@@ -212,11 +212,6 @@ namespace EvFutBot.Models
                                         // ignored
                                     }
 
-                                    await HandleException(ex, settings.SecurityDelay, Email);
-                                    return true;
-                                }
-                                catch (Exception ex)
-                                {
                                     await HandleException(ex, settings.SecurityDelay, Email);
                                     return true;
                                 }

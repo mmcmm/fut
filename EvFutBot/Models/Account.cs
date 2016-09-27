@@ -663,6 +663,23 @@ namespace EvFutBot.Models
                         ? GetWonBidPrice(expiredCard.ItemData.AssetId, expiredCard.ItemData.LastSalePrice,
                             expiredCard.ItemData.Rating, settings.SellPercent)
                         : AuctionInfo.CalculatePreviousBid(expiredCard.BuyNowPrice);
+                    // if the card doesn't sell we quick sell it
+                    if (sellPrice <= expiredCard.ItemData.MarketDataMinPrice)
+                    {
+                        try
+                        {
+                            await Task.Delay(settings.RmpDelayLow);
+                            await _utClient.QuickSellItemAsync(expiredCard.ItemData.Id);
+                            // in case something goes wrong
+                            sellPrice = AuctionInfo.CalculateNextBid(expiredCard.ItemData.MarketDataMinPrice);
+                            continue;
+                        }
+                        catch (Exception)
+                        {
+                            //ignored
+                        }
+                        
+                    }
                     if (sellPrice < 250) sellPrice = 250; // contracts and cheap customer cards
 
                     await Task.Delay(settings.RmpDelay);
