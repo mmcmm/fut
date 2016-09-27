@@ -70,7 +70,7 @@ namespace EvFutBot.Models
             foreach (var auction in searchResponse.AuctionInfo
                 .Where(auction => auction.ItemData.ResourceId == resourceId))
             {
-                if (auction.Expires <= settings.RmpDelay/1000/6 || auction.Expires >= 6*60) continue;
+                if (auction.Expires >= 6*60) continue;
                 var nextbid = auction.CalculateBid();
                 if (nextbid > maxPrice) continue;
                 maxPrice = nextbid;
@@ -147,9 +147,9 @@ namespace EvFutBot.Models
 
         public async Task<bool> SearchAndBuyFitness(Settings settings, DateTime startedAt)
         {
-            var fitnessStdPrice = GetConsumablePrice(Platform, FitnessTeamDefId); // fitness special +5%
-            var sellPrice = GetEaPrice(fitnessStdPrice, Convert.ToByte(settings.SellPercent + 5));
-            var maxPrice = GetEaPrice(fitnessStdPrice, Convert.ToByte(settings.BinPercent + 5));
+            var fitnessStdPrice = GetConsumablePrice(Platform, FitnessTeamDefId);
+            var sellPrice = GetEaPrice(fitnessStdPrice, Convert.ToByte(settings.SellPercent));
+            var maxPrice = GetEaPrice(fitnessStdPrice, Convert.ToByte(settings.BinPercent));
             var minPrice = GetEaPrice(CalculateMinPrice(maxPrice), 100);
             if (maxPrice > Credits) return false;
 
@@ -171,18 +171,6 @@ namespace EvFutBot.Models
             {
                 await Task.Delay(settings.RmpDelay);
                 searchResponse = await _utClient.SearchAsync(searchParameters);
-
-                while (searchResponse.AuctionInfo.Count >= (searchParameters.PageSize == 15 ? 16 : 13))
-                {
-                    if (searchResponse.AuctionInfo.Any(c => c.BuyNowPrice <= maxPrice))
-                    {
-                        break;
-                    }
-                    searchParameters.Page++;
-                    searchParameters.PageSize = 12;
-                    await Task.Delay(settings.RmpDelay);
-                    searchResponse = await _utClient.SearchAsync(searchParameters);
-                }
                 // we also sort them for buying
                 searchResponse.AuctionInfo.Sort(
                     (x, y) => Convert.ToInt32(x.BuyNowPrice) - Convert.ToInt32(y.BuyNowPrice));

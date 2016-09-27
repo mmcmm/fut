@@ -22,7 +22,7 @@ namespace EvFutBot.Models
 {
     public partial class Account
     {
-        public const uint SmallAccount = 1000; //todo
+        public const uint SmallAccount = 6000;
         private const byte TradePileMax = 30;
         private const byte WatchListMax = 50;
         private const int QuickSellLimit = 900;
@@ -320,18 +320,6 @@ namespace EvFutBot.Models
             {
                 await Task.Delay(settings.RmpDelay);
                 searchResponse = await _utClient.SearchAsync(searchParameters);
-
-                while (searchResponse.AuctionInfo.Count >= (searchParameters.PageSize == 15 ? 16 : 13))
-                {
-                    if (searchResponse.AuctionInfo.Any(c => c.BuyNowPrice <= maxPrice))
-                    {
-                        break;
-                    }
-                    searchParameters.Page++;
-                    searchParameters.PageSize = 12;
-                    await Task.Delay(settings.RmpDelay);
-                    searchResponse = await _utClient.SearchAsync(searchParameters);
-                }
                 // we also sort them for buying
                 searchResponse.AuctionInfo.Sort(
                     (x, y) => Convert.ToInt32(x.BuyNowPrice) - Convert.ToInt32(y.BuyNowPrice));
