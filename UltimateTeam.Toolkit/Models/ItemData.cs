@@ -108,5 +108,23 @@ namespace UltimateTeam.Toolkit.Models
         public string LastName { get; set; }
 
         public uint Attribute { get; set; }
+
+        public string DetailDescription { get; set; }
+
+        public uint Year { get; set; }
+
+        public string FieldPos { get; set; }
+
+        public uint StadiumId { get; set; }
+
+        public string Manufacturer { get; set; }
+
+        public string Negotiation { get; set; }
+
+        public string TrainingItem { get; set; }      
+
+        public int Capacity { get; set; }
+
+        public int PosBonus { get; set; }
     }
 }

@@ -702,10 +702,16 @@ namespace EvFutBot.Models
                 {
                     var sellPrice = GetWonBidPrice(wonBidCard.ItemData.AssetId, wonBidCard.ItemData.LastSalePrice,
                         wonBidCard.ItemData.Rating, settings.SellPercent);
+                    var startPrice = CalculateBidPrice(sellPrice, settings.SellPercent);
+                    // in case we can't get a reference price
+                    if (sellPrice == 0 || sellPrice > wonBidCard.ItemData.MarketDataMaxPrice || startPrice < wonBidCard.ItemData.MarketDataMinPrice)
+                    {
+                        sellPrice = wonBidCard.ItemData.MarketDataMaxPrice;
+                        startPrice = wonBidCard.ItemData.MarketDataMinPrice;
+                    }
                     await Task.Delay(settings.RmpDelay);
                     await _utClient.ListAuctionAsync(new AuctionDetails(wonBidCard.ItemData.Id,
-                        GetAuctionDuration(startedAt, settings.RunforHours, Login),
-                        CalculateBidPrice(sellPrice, settings.SellPercent), sellPrice));
+                        GetAuctionDuration(startedAt, settings.RunforHours, Login), startPrice, sellPrice));
                 }
                 catch (PermissionDeniedException ex)
                 {
