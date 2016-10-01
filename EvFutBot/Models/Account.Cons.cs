@@ -148,9 +148,8 @@ namespace EvFutBot.Models
         public async Task<bool> SearchAndBuyFitness(Settings settings, DateTime startedAt)
         {
             var fitnessStdPrice = GetConsumablePrice(Platform, FitnessTeamDefId);
-            var sellPrice = GetEaPrice(fitnessStdPrice, Convert.ToByte(settings.SellPercent));
-            // I guess we can be a little greedy
-            var maxPrice = AuctionInfo.CalculateNextBid(GetEaPrice(fitnessStdPrice, settings.BinPercent));
+            var sellPrice = GetEaPrice(fitnessStdPrice, Convert.ToByte(settings.SellPercent));          
+            var maxPrice = GetEaPrice(fitnessStdPrice, settings.BinPercent);
             var minPrice = GetEaPrice(CalculateMinPrice(maxPrice), 100);
             if (maxPrice > Credits) return false;
 
@@ -224,6 +223,9 @@ namespace EvFutBot.Models
 
                         if (tradeItem != null)
                         {
+                            // I guess we can be a little greedy
+                            sellPrice = AuctionInfo.CalculateNextBid(sellPrice);
+
                             await Task.Delay(settings.RmpDelay);
                             await _utClient.ListAuctionAsync(new AuctionDetails(boughtAction.ItemData.Id,
                                 GetAuctionDuration(startedAt, settings.RunforHours, Login),

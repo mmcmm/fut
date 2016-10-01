@@ -18,7 +18,7 @@ namespace EvFutBot
     internal class Program
     {
         private static IScheduler _scheduler;
-        public static string Signature = "D"; // we use to make all servers updated
+        public static string Signature = "E"; // we use to make all servers updated
         public static string DevMachine = "DESKTOP-3A254DD";
         public static string WorkMachine = "WIN-76FUKLJMOIP";
 
@@ -29,7 +29,7 @@ namespace EvFutBot
 //                InitUpdateBaseIds();
 //                InitStatistics();
 //                InitEvoCustomerCards();
-                InitAccounts(AppVersion.WebApp);
+                InitAccounts(AppVersion.CompanionApp);
             }
             else
             {
