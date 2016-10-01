@@ -29,7 +29,7 @@ namespace EvFutBot
 //                InitUpdateBaseIds();
 //                InitStatistics();
 //                InitEvoCustomerCards();
-                InitAccounts(AppVersion.CompanionApp);
+                InitAccounts(AppVersion.WebApp);
             }
             else
             {
