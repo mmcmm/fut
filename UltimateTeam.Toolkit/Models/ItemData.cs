@@ -121,7 +121,7 @@ namespace UltimateTeam.Toolkit.Models
 
         public string Negotiation { get; set; }
 
-        public string TrainingItem { get; set; }      
+        public ItemData TrainingItem { get; set; }      
 
         public int Capacity { get; set; }
 
