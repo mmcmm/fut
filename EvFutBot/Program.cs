@@ -18,7 +18,7 @@ namespace EvFutBot
     internal class Program
     {
         private static IScheduler _scheduler;
-        public static string Signature = "B"; // we use to make all servers updated
+        public static string Signature = "D"; // we use to make all servers updated
         public static string DevMachine = "DESKTOP-3A254DD";
         public static string WorkMachine = "WIN-76FUKLJMOIP";
 
@@ -29,7 +29,7 @@ namespace EvFutBot
 //                InitUpdateBaseIds();
 //                InitStatistics();
 //                InitEvoCustomerCards();
-                InitAccounts(AppVersion.WebApp);
+                InitAccounts(AppVersion.CompanionApp);
             }
             else
             {
@@ -88,7 +88,7 @@ namespace EvFutBot
                         .Build();
 
                     _scheduler.ScheduleJob(webappjob, webapptrigger);
-//                    _scheduler.ScheduleJob(mobilejob, mobiletrigger); todo suport mobile
+                    _scheduler.ScheduleJob(mobilejob, mobiletrigger); 
                     _scheduler.ScheduleJob(closeappjob, closeapptrigger);
 //                    _scheduler.ScheduleJob(evoaddcardsjob, evoaddcardstrigger); todo start selling
                 }

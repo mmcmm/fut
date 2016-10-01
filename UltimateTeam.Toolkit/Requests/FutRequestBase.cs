@@ -115,10 +115,10 @@ namespace UltimateTeam.Toolkit.Requests
         protected void AddCommonMobileHeaders()
         {
             HttpClient.ClearRequestHeaders();
+            HttpClient.AddRequestHeader(NonStandardHttpHeaders.CSP, "active");
             HttpClient.AddRequestHeader(NonStandardHttpHeaders.PhishingToken, _phishingToken);
             HttpClient.AddRequestHeader(NonStandardHttpHeaders.NucleusId, _nucleusId);
-            HttpClient.AddRequestHeader(NonStandardHttpHeaders.SessionId, _sessionId);
-            HttpClient.AddRequestHeader(NonStandardHttpHeaders.CSP, "active");
+            HttpClient.AddRequestHeader(NonStandardHttpHeaders.SessionId, _sessionId);            
             HttpClient.AddRequestHeader(NonStandardHttpHeaders.Origin, @"file://");
             AddAcceptEncodingHeader();
             AddAcceptMobileLanguageHeader();
@@ -131,7 +131,6 @@ namespace UltimateTeam.Toolkit.Requests
         protected void AddMobileLoginHeaders()
         {
             HttpClient.ClearRequestHeaders();
-            HttpClient.AddRequestHeader(NonStandardHttpHeaders.CSP, "active");
             AddAcceptHeader("*/*");
             HttpClient.AddRequestHeader(HttpHeaders.ContentType, "application/json");
             AddAcceptEncodingHeader();
@@ -175,8 +174,7 @@ namespace UltimateTeam.Toolkit.Requests
             HttpClient.ClearRequestHeaders();
             HttpClient.AddConnectionKeepAliveHeader();
             HttpClient.AddRequestHeader("Origin", "file://");
-            HttpClient.AddRequestHeader("x-ea-taxv", "1");
-            HttpClient.AddRequestHeader("CSP", "active");
+            HttpClient.AddRequestHeader("x-ea-taxv", "1");           
             AddMobileUserAgent();
             HttpClient.AddRequestHeader(HttpHeaders.ContentType, "application/json");
             AddAcceptHeader("text/plain, */*; q=0.01");

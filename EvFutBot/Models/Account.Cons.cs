@@ -149,7 +149,8 @@ namespace EvFutBot.Models
         {
             var fitnessStdPrice = GetConsumablePrice(Platform, FitnessTeamDefId);
             var sellPrice = GetEaPrice(fitnessStdPrice, Convert.ToByte(settings.SellPercent));
-            var maxPrice = GetEaPrice(fitnessStdPrice, Convert.ToByte(settings.BinPercent));
+            // I guess we can be a little greedy
+            var maxPrice = AuctionInfo.CalculateNextBid(GetEaPrice(fitnessStdPrice, settings.BinPercent));
             var minPrice = GetEaPrice(CalculateMinPrice(maxPrice), 100);
             if (maxPrice > Credits) return false;
 

@@ -54,16 +54,22 @@ namespace UltimateTeam.Toolkit.Requests
                 var pid = await GetMobilePidAsync(authToken.Access_Token);
                 _nucUserId = pid.Pid.ExternalRefValue;
 
-                var sessionCode = await GetMobileAuthCodeAsync(authToken.Access_Token);
+                var sessionCode = await GetMobileAuthCodeAsync(authToken.Access_Token);              
+                try
+                {
+                    var powSessionId = await AuthPOWAsync(sessionCode.Code);
+                    _powSessionId = powSessionId.Sid;
+                }
+                catch (Exception)
+                {
+                    // ignored 
+                }
                 var authCode = await GetMobileAuthCodeAsync(authToken.Access_Token);
-                var powSessionId = await AuthPOWAsync(sessionCode.Code);
-                _powSessionId = powSessionId.Sid;
 
-                var nucleusId = await GetMobileNucleusIdAsync();
-                _nucPersonaId = nucleusId.UserData.Data.LastOrDefault(n => n.Sku == GetGameSku(_loginDetails.Platform)).NucPersId;
                 var shards = await GetMobileShardsAsync();
                 var userAccounts = await GetMobileUserAccountsAsync(_loginDetails.Platform);
-                var sessionId = await AuthAsync(authCode.Code, nucleusId.UserData.Data.LastOrDefault(n => n.Sku == GetGameSku(_loginDetails.Platform)).NucPersId, GetGameSku(_loginDetails.Platform));
+                _nucPersonaId = userAccounts.UserAccountInfo.Personas.LastOrDefault().PersonaId.ToString();            
+                var sessionId = await AuthAsync(authCode.Code, _nucPersonaId, GetGameSku(_loginDetails.Platform));
                 _sessionId = sessionId.Sid;
 
                 var phishingToken = await ValidateAsync(_loginDetails);
@@ -80,14 +86,7 @@ namespace UltimateTeam.Toolkit.Requests
         {
             AddMobileLoginHeaders();
             AddContentHeader("application/x-www-form-urlencoded");
-            var authTokenResponseMessage = await HttpClient.PostAsync(Resources.Token, new FormUrlEncodedContent(
-                                                                                           new[]
-                                                                                           {
-                                                                                               new KeyValuePair<string, string>("grant_type", "authorization_code"),
-                                                                                               new KeyValuePair<string, string>("code", code),
-                                                                                               new KeyValuePair<string, string>("client_id", "FIFA-17-MOBILE-COMPANION"),
-                                                                                               new KeyValuePair<string, string>("client_secret", "KrEoFK9ssvXKRWnTMgAu1OAMn7Y37ueUh1Vy7dIk2earFDUDABCvZuNIidYxxNbhwbj3y8pq6pSf8zBW"),
-                                                                                           }));
+            var authTokenResponseMessage = await HttpClient.PostAsync(string.Format(Resources.Token, code), new FormUrlEncodedContent(new KeyValuePair<string, string>[0]));
             return await DeserializeAsync<AuthToken>(authTokenResponseMessage);
         }
 
@@ -102,15 +101,7 @@ namespace UltimateTeam.Toolkit.Requests
         private async Task<AuthCode> GetMobileAuthCodeAsync(string accessToken)
         {
             AddMobileLoginHeaders();
-            var authTokenResponseMessage = await HttpClient.PostAsync(Resources.AuthCode, new FormUrlEncodedContent(
-                                                                                              new[]
-                                                                                              {
-                                                                                                  new KeyValuePair<string, string>("client_id", "FOS-SERVER"),
-                                                                                                  new KeyValuePair<string, string>("redirect_uri", "nucleus:rest"),
-                                                                                                  new KeyValuePair<string, string>("response_type", "code"),
-                                                                                                  new KeyValuePair<string, string>("access_token", accessToken),
-                                                                                                  new KeyValuePair<string, string>("machineProfileKey", _machineKey),
-                                                                                              }));
+            var authTokenResponseMessage = await HttpClient.PostAsync(string.Format(Resources.AuthCode, accessToken, _machineKey), new FormUrlEncodedContent(new KeyValuePair<string, string>[0]));
             return await DeserializeAsync<AuthCode>(authTokenResponseMessage);
         }
 
@@ -120,7 +111,7 @@ namespace UltimateTeam.Toolkit.Requests
             AddMobileLoginHeaders();
             HttpClient.AddRequestHeader(NonStandardHttpHeaders.PowSessionId, string.Empty);
             HttpClient.AddRequestHeader(NonStandardHttpHeaders.SessionId, string.Empty);
-            var content = $@"{{ ""isReadOnly"":true,""sku"":""FUT17AND"",""clientVersion"":20,""locale"":""en-GB"",""method"":""authcode"",""priorityLevel"":4,""identification"":{{""authCode"":""{authCode}"",""redirectUrl"":""nucleus:rest""}} }}";
+            var content = $@"{{ ""isReadOnly"":true,""sku"":""FUT17AND"",""clientVersion"":21,""locale"":""en-GB"",""method"":""authcode"",""priorityLevel"":4,""identification"":{{""authCode"":""{authCode}"",""redirectUrl"":""nucleus:rest""}} }}";
             var authMessage = await HttpClient.PostAsync(string.Format(Resources.POWAuth, DateTime.Now.ToUnixTime()), new StringContent(content));
             var authResponse = await DeserializeAsync<Auth>(authMessage);
 
@@ -209,32 +200,51 @@ namespace UltimateTeam.Toolkit.Requests
                                                                                                                          {
                                                                                                                              new KeyValuePair<string, string>("email", loginDetails.Username),
                                                                                                                              new KeyValuePair<string, string>("password", loginDetails.Password),
+                                                                                                                             new KeyValuePair<string, string>("country", "DE"),
+                                                                                                                             new KeyValuePair<string, string>("phoneNumber", ""),
+                                                                                                                             new KeyValuePair<string, string>("passwordForPhone", ""),
                                                                                                                              new KeyValuePair<string, string>("_rememberMe", "on"),
                                                                                                                              new KeyValuePair<string, string>("rememberMe", "on"),
                                                                                                                              new KeyValuePair<string, string>("_eventId", "submit"),
-                                                                                                                             new KeyValuePair<string, string>("facebookAuth", "")
+                                                                                                                             new KeyValuePair<string, string>("gCaptchaResponse", ""),
+                                                                                                                             new KeyValuePair<string, string>("isPhoneNumberLogin", "false"),
+                                                                                                                             new KeyValuePair<string, string>("isIncompletePhone", "")
                                                                                                                          }));
             loginResponseMessage.EnsureSuccessStatusCode();
-      
+            HttpResponseMessage loginResponseMessage2 = null;
+            //check if twofactorcode is required
             var contentData = await loginResponseMessage.Content.ReadAsStringAsync();
-            if (contentData.Contains("redirectUri"))
+            if (contentData.Contains("var redirectUri = 'https://signin.ea.com:443/p/web2/login?execution="))
             {
-                var redirectUri = contentData.Split('\'', '\'')[1] + "&_eventId=end";
-                loginResponseMessage = await HttpClient.GetAsync(redirectUri);
-                loginResponseMessage.EnsureSuccessStatusCode();
-                contentData = await loginResponseMessage.Content.ReadAsStringAsync();
-                string query = loginResponseMessage.RequestMessage.RequestUri.Query;
-               
+                var redirectUrl = "https://signin.ea.com:443/p/web2/login?execution=" +
+                                     contentData.Substring(
+                                         contentData.IndexOf("https://signin.ea.com:443/p/web2/login?execution=") +
+                                         "https://signin.ea.com:443/p/web2/login?execution=".Length);
+                redirectUrl = redirectUrl.Substring(0, redirectUrl.IndexOf("'")) + "&_eventId=end";
+                 
+
+                loginResponseMessage2 = await HttpClient.GetAsync(redirectUrl);
+                loginResponseMessage2.EnsureSuccessStatusCode();
+
+                
+                contentData = await loginResponseMessage2.Content.ReadAsStringAsync();
+
             }
 
             //check if twofactorcode is required
             if (contentData.Contains("We sent a security code to your") || contentData.Contains("Your security code was sent to") || contentData.Contains("Enter the 6-digit verification code generated by your App Authenticator") || contentData.Contains("Enter the 6-digit verification code generated by your App Authenticator"))
-                await SetTwoFactorCodeAsync(loginResponseMessage);
-
-            //TO DO: How to verify, that content is a companion code
-            else if (contentData.Length <= 64)
+                await SetTwoFactorCodeAsync(loginResponseMessage2);
+     
+            else if (loginResponseMessage2 != null && loginResponseMessage2.RequestMessage.RequestUri.ToString().Contains("code"))
             {
-                _code = contentData;
+                var code = loginResponseMessage2.RequestMessage.RequestUri.ToString();
+                code = code.Substring(code.IndexOf("code=", StringComparison.Ordinal) + "code=".Length);
+                
+                //TO DO: How to verify, that content is a companion code
+                if (code.Length <= 64)
+                {
+                    _code = code;
+                }
             }
         }
 
@@ -264,11 +274,17 @@ namespace UltimateTeam.Toolkit.Requests
 
             if (contentData.Contains("Tired of waiting for your code?"))
                 await SkipAuthenticatorAdvertiseAsync(codeResponseMessage);
-
-            //TO DO: How to verify, that content is a companion code
-            else if (contentData.Length <= 64)
+          
+            else if (codeResponseMessage.RequestMessage.RequestUri.ToString().Contains("code"))
             {
-                _code = contentData;
+                var code = codeResponseMessage.RequestMessage.RequestUri.ToString();
+                code = code.Substring(code.IndexOf("code=", StringComparison.Ordinal) + "code=".Length);
+
+                //TO DO: How to verify, that content is a companion code
+                if (code.Length <= 64)
+                {
+                    _code = code;
+                }
             }
         }
 
@@ -288,11 +304,17 @@ namespace UltimateTeam.Toolkit.Requests
             authenticatorResponseMessage.EnsureSuccessStatusCode();
 
             var contentData = await authenticatorResponseMessage.Content.ReadAsStringAsync();
-
-            //TO DO: How to verify, that content is a companion code
-            if (contentData.Length <= 64)
+            
+           if (authenticatorResponseMessage.RequestMessage.RequestUri.ToString().Contains("code"))
             {
-                _code = contentData;
+                var code = authenticatorResponseMessage.RequestMessage.RequestUri.ToString();
+                code = code.Substring(code.IndexOf("code=", StringComparison.Ordinal) + "code=".Length);
+
+                //TO DO: How to verify, that content is a companion code
+                if (code.Length <= 64)
+                {
+                    _code = code;
+                }
             }
         }
 
