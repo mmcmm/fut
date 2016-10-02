@@ -264,26 +264,26 @@ namespace EvFutBot.Models
                             players = GetPotentialPlayers(settings.Batch, settings.MaxCardCost);
                         }
                     }
-                     
+
                     if (Credits <= SmallAccount)
                     {
                         await SearchAndBuyFitness(settings, _startedAt); // a fitness round
 
                         var tradePileSize = await GetTradePileSize(settings);
                         var watchListSize = await GetWatchListSize(settings);
-                      
+
                         // we must not lose control
                         if (watchListSize <= WatchListMax/5 && tradePileSize <= TradePileMax/3)
                         {
-                            for (byte i = 1; i <= 6; i++) // we go over 6 pages
+                            for (byte i = 3; i <= 6; i++) // we go over 3 pages
                             {
-                                await Task.Delay(settings.RmpDelay);
+                                await Task.Delay(settings.SecurityDelay);
                                 await SearchAndBidPContracts(settings, _startedAt, i);
                             }
                         }
                         else
                         {
-                            await Task.Delay(settings.SecurityDelay*4);
+                            await Task.Delay(settings.SecurityDelay*10);
                             await ClearWatchList(settings, _startedAt);
                             Credits = await ClearTradePile(settings, _startedAt);
                         }
@@ -706,7 +706,8 @@ namespace EvFutBot.Models
                         wonBidCard.ItemData.Rating, settings.SellPercent);
                     var startPrice = CalculateBidPrice(sellPrice, settings.SellPercent);
                     // in case we can't get a reference price
-                    if (sellPrice == 0 || sellPrice > wonBidCard.ItemData.MarketDataMaxPrice || startPrice < wonBidCard.ItemData.MarketDataMinPrice)
+                    if (sellPrice == 0 || sellPrice > wonBidCard.ItemData.MarketDataMaxPrice ||
+                        startPrice < wonBidCard.ItemData.MarketDataMinPrice)
                     {
                         sellPrice = wonBidCard.ItemData.MarketDataMaxPrice;
                         startPrice = wonBidCard.ItemData.MarketDataMinPrice;
