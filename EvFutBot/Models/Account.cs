@@ -256,7 +256,7 @@ namespace EvFutBot.Models
                         Update(panel, Credits, Panel.Statuses.Working, settings.RmpDelay);
 
                         // we get new players and run fitness round here.
-                        if (Credits >= SmallAccount) await SearchAndBuyFitness(settings, _startedAt);
+                        await SearchAndBuyFitness(settings, _startedAt);
                         players = GetPotentialPlayers(settings.Batch, settings.MaxCardCost); // new players
                         while (players.Count == 0) // a fail safe
                         {
@@ -264,12 +264,14 @@ namespace EvFutBot.Models
                             players = GetPotentialPlayers(settings.Batch, settings.MaxCardCost);
                         }
                     }
-                    // less for 360
-                    if (Credits <= SmallAccount && !(Platform == Platform.Xbox360 && Credits >= 2000))
+                     
+                    if (Credits <= SmallAccount)
                     {
+                        await SearchAndBuyFitness(settings, _startedAt); // a fitness round
+
                         var tradePileSize = await GetTradePileSize(settings);
                         var watchListSize = await GetWatchListSize(settings);
-
+                      
                         // we must not lose control
                         if (watchListSize <= WatchListMax/5 && tradePileSize <= TradePileMax/3)
                         {
@@ -281,7 +283,7 @@ namespace EvFutBot.Models
                         }
                         else
                         {
-                            await Task.Delay(settings.SecurityDelay*5);
+                            await Task.Delay(settings.SecurityDelay*4);
                             await ClearWatchList(settings, _startedAt);
                             Credits = await ClearTradePile(settings, _startedAt);
                         }
