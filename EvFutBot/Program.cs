@@ -83,7 +83,7 @@ namespace EvFutBot
                     var evoaddcardstrigger = TriggerBuilder.Create()
                         .WithIdentity("evoaddcardstrigger", "group1")
                         .WithSimpleSchedule(x => x
-                            .WithIntervalInMinutes(30) // every 30 min
+                            .WithIntervalInMinutes(45) // every 30 min
                             .RepeatForever())
                         .Build();
 
