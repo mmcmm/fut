@@ -29,7 +29,7 @@ namespace EvFutBot
 //                InitUpdateBaseIds();
 //                InitStatistics();
 //                InitEvoCustomerCards();
-                InitAccounts(AppVersion.CompanionApp);
+                InitAccounts(AppVersion.WebApp);
             }
             else
             {
@@ -83,14 +83,14 @@ namespace EvFutBot
                     var evoaddcardstrigger = TriggerBuilder.Create()
                         .WithIdentity("evoaddcardstrigger", "group1")
                         .WithSimpleSchedule(x => x
-                            .WithIntervalInMinutes(15) // every 15 min
+                            .WithIntervalInMinutes(30) // every 30 min
                             .RepeatForever())
                         .Build();
 
                     _scheduler.ScheduleJob(webappjob, webapptrigger);
                     _scheduler.ScheduleJob(mobilejob, mobiletrigger); 
                     _scheduler.ScheduleJob(closeappjob, closeapptrigger);
-//                    _scheduler.ScheduleJob(evoaddcardsjob, evoaddcardstrigger); todo start selling
+                    _scheduler.ScheduleJob(evoaddcardsjob, evoaddcardstrigger); 
                 }
                 catch (SchedulerException ex)
                 {
