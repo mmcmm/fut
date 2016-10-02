@@ -23,7 +23,7 @@ namespace EvFutBot.Models
 
             var rand = new Random();
             RmpDelay = rand.Next(rpmDelay[0]*1000, rpmDelay[1]*1000);
-            RmpDelayLow = 4*1000; // 4 seconds
+            RmpDelayLow = 6*1000; // 6 seconds
             PreBidDelay = 0; // no delay
             RunforHours = rand.Next(runforHours[0], runforHours[1]);
             RmpDelayPrices = Convert.ToInt32(60/((decimal) 4900/RunforHours/60)*1000); // 5000 request limit per day
