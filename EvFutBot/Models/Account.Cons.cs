@@ -148,7 +148,7 @@ namespace EvFutBot.Models
         public async Task<bool> SearchAndBuyFitness(Settings settings, DateTime startedAt)
         {
             var fitnessStdPrice = GetConsumablePrice(Platform, FitnessTeamDefId);
-            if (fitnessStdPrice <= Credits) return false;
+            if (fitnessStdPrice > Credits) return false;
 
             var sellPrice = GetEaPrice(fitnessStdPrice, Convert.ToByte(settings.SellPercent));          
             var maxPrice = GetEaPrice(fitnessStdPrice, settings.BinPercent);

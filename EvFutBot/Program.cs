@@ -18,7 +18,7 @@ namespace EvFutBot
     internal class Program
     {
         private static IScheduler _scheduler;
-        public static string Signature = "G"; // we use to make all servers updated
+        public static string Signature = "A"; // we use to make all servers updated
         public static string DevMachine = "DESKTOP-3A254DD";
         public static string WorkMachine = "WIN-76FUKLJMOIP";
 
@@ -83,7 +83,7 @@ namespace EvFutBot
                     var evoaddcardstrigger = TriggerBuilder.Create()
                         .WithIdentity("evoaddcardstrigger", "group1")
                         .WithSimpleSchedule(x => x
-                            .WithIntervalInMinutes(45) // every 30 min
+                            .WithIntervalInMinutes(60) // every 60 min
                             .RepeatForever())
                         .Build();
 
