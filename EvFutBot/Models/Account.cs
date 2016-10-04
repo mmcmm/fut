@@ -132,7 +132,7 @@ namespace EvFutBot.Models
             {
                 var rand = new Random();
                 var randDelay = rand.Next(60, 240);
-                await HandleException(ex, randDelay, Email); // we try just 1 hour
+                await HandleException(ex, randDelay, Email); 
                 return null;
             }
             catch (CaptchaTriggeredException ex)
