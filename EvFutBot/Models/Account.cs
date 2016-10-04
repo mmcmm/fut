@@ -36,6 +36,7 @@ namespace EvFutBot.Models
         public readonly string Gmail;
         public readonly Platform Platform;
         private DateTime _startedAt;
+        private int _runforHours;
         private FutClient _utClient;
 
         public Account(uint id, string email, string password, string utSecurityAnswer, string platform,
@@ -131,7 +132,7 @@ namespace EvFutBot.Models
             {
                 var rand = new Random();
                 var randDelay = rand.Next(60, 240);
-                await HandleException(ex, randDelay, 1, Email); // we try just 1 hour
+                await HandleException(ex, randDelay, Email); // we try just 1 hour
                 return null;
             }
             catch (CaptchaTriggeredException ex)
@@ -217,6 +218,7 @@ namespace EvFutBot.Models
             return Task.Run(async () =>
             {
                 _startedAt = Convert.ToDateTime(panel.StartedAt);
+                _runforHours = settings.RunforHours;
 
                 // clear any unassigned purchased and tradepile
                 Credits = await ClearTradePile(settings, _startedAt);
@@ -335,7 +337,7 @@ namespace EvFutBot.Models
             }
             catch (ArgumentException ex)
             {
-                await HandleException(ex, settings.SecurityDelay, settings.RunforHours, Email);
+                await HandleException(ex, settings.SecurityDelay, Email);
                 return false;
             }
             catch (CaptchaTriggeredException ex)
@@ -407,7 +409,7 @@ namespace EvFutBot.Models
                 }
                 catch (ArgumentException ex)
                 {
-                    await HandleException(ex, settings.SecurityDelay, settings.RunforHours, Email);
+                    await HandleException(ex, settings.SecurityDelay, Email);
                     return false;
                 }
                 catch (CaptchaTriggeredException ex)
@@ -457,7 +459,7 @@ namespace EvFutBot.Models
             }
             catch (ArgumentException ex)
             {
-                await HandleException(ex, settings.SecurityDelay, settings.RunforHours, Email);
+                await HandleException(ex, settings.SecurityDelay, Email);
                 return false;
             }
             catch (CaptchaTriggeredException ex)
@@ -500,7 +502,7 @@ namespace EvFutBot.Models
                 }
                 catch (ArgumentException ex)
                 {
-                    await HandleException(ex, settings.SecurityDelay, settings.RunforHours, Email);
+                    await HandleException(ex, settings.SecurityDelay, Email);
                     return false;
                 }
                 catch (CaptchaTriggeredException ex)
@@ -537,7 +539,7 @@ namespace EvFutBot.Models
             }
             catch (ArgumentException ex)
             {
-                await HandleException(ex, settings.SecurityDelay, settings.RunforHours, Email);
+                await HandleException(ex, settings.SecurityDelay, Email);
                 return Credits;
             }
             catch (CaptchaTriggeredException ex)
@@ -569,7 +571,7 @@ namespace EvFutBot.Models
                 }
                 catch (ArgumentException ex)
                 {
-                    await HandleException(ex, settings.SecurityDelay, settings.RunforHours, Email);
+                    await HandleException(ex, settings.SecurityDelay, Email);
                 }
                 catch (CaptchaTriggeredException ex)
                 {
@@ -614,7 +616,7 @@ namespace EvFutBot.Models
                 }
                 catch (ArgumentException ex)
                 {
-                    await HandleException(ex, settings.SecurityDelay, settings.RunforHours, Email);
+                    await HandleException(ex, settings.SecurityDelay, Email);
                     break;
                 }
                 catch (CaptchaTriggeredException ex)
@@ -674,7 +676,7 @@ namespace EvFutBot.Models
                 }
                 catch (ArgumentException ex)
                 {
-                    await HandleException(ex, settings.SecurityDelay, settings.RunforHours, Email);
+                    await HandleException(ex, settings.SecurityDelay, Email);
                     break;
                 }
                 catch (CaptchaTriggeredException ex)
@@ -730,7 +732,7 @@ namespace EvFutBot.Models
                 }
                 catch (ArgumentException ex)
                 {
-                    await HandleException(ex, settings.SecurityDelay, settings.RunforHours, Email);
+                    await HandleException(ex, settings.SecurityDelay, Email);
                     break;
                 }
                 catch (CaptchaTriggeredException ex)
@@ -767,7 +769,7 @@ namespace EvFutBot.Models
             }
             catch (ArgumentException ex)
             {
-                await HandleException(ex, settings.SecurityDelay, settings.RunforHours, Email);
+                await HandleException(ex, settings.SecurityDelay, Email);
                 return false;
             }
             catch (CaptchaTriggeredException ex)
@@ -803,7 +805,7 @@ namespace EvFutBot.Models
                 }
                 catch (ArgumentException ex)
                 {
-                    await HandleException(ex, settings.SecurityDelay, settings.RunforHours, Email);
+                    await HandleException(ex, settings.SecurityDelay, Email);
                     break;
                 }
                 catch (CaptchaTriggeredException ex)
@@ -840,7 +842,7 @@ namespace EvFutBot.Models
             }
             catch (ArgumentException ex)
             {
-                await HandleException(ex, settings.SecurityDelay, settings.RunforHours, Email);
+                await HandleException(ex, settings.SecurityDelay, Email);
                 return false;
             }
             catch (CaptchaTriggeredException ex)
@@ -888,7 +890,7 @@ namespace EvFutBot.Models
                 }
                 catch (ArgumentException ex)
                 {
-                    await HandleException(ex, settings.SecurityDelay, settings.RunforHours, Email);
+                    await HandleException(ex, settings.SecurityDelay, Email);
                     return false;
                 }
                 catch (CaptchaTriggeredException ex)
@@ -925,7 +927,7 @@ namespace EvFutBot.Models
             }
             catch (ArgumentException ex)
             {
-                await HandleException(ex, settings.SecurityDelay, settings.RunforHours, Email);
+                await HandleException(ex, settings.SecurityDelay, Email);
                 return false;
             }
             catch (CaptchaTriggeredException ex)
@@ -1002,7 +1004,7 @@ namespace EvFutBot.Models
                 }
                 catch (ArgumentException ex)
                 {
-                    await HandleException(ex, settings.SecurityDelay, settings.RunforHours, Email);
+                    await HandleException(ex, settings.SecurityDelay, Email);
                     break;
                 }
                 catch (CaptchaTriggeredException ex)
@@ -1083,7 +1085,7 @@ namespace EvFutBot.Models
                 }
                 catch (ArgumentException ex)
                 {
-                    await HandleException(ex, settings.SecurityDelay, settings.RunforHours, Email);
+                    await HandleException(ex, settings.SecurityDelay, Email);
                     break;
                 }
                 catch (CaptchaTriggeredException ex)
@@ -1127,7 +1129,7 @@ namespace EvFutBot.Models
             }
             catch (ArgumentException ex)
             {
-                await HandleException(ex, settings.SecurityDelay, settings.RunforHours, Email);
+                await HandleException(ex, settings.SecurityDelay, Email);
                 return false;
             }
             catch (CaptchaTriggeredException ex)
@@ -1174,7 +1176,7 @@ namespace EvFutBot.Models
             }
             catch (ArgumentException ex)
             {
-                await HandleException(ex, settings.SecurityDelay, settings.RunforHours, Email);
+                await HandleException(ex, settings.SecurityDelay, Email);
                 return false;
             }
             catch (CaptchaTriggeredException ex)
@@ -1210,7 +1212,7 @@ namespace EvFutBot.Models
             }
             catch (ArgumentException ex)
             {
-                await HandleException(ex, settings.SecurityDelay, settings.RunforHours, Email);
+                await HandleException(ex, settings.SecurityDelay, Email);
                 return TradePileMax;
             }
             catch (CaptchaTriggeredException ex)
@@ -1246,7 +1248,7 @@ namespace EvFutBot.Models
             }
             catch (ArgumentException ex)
             {
-                await HandleException(ex, settings.SecurityDelay, settings.RunforHours, Email);
+                await HandleException(ex, settings.SecurityDelay, Email);
                 return WatchListMax;
             }
             catch (CaptchaTriggeredException ex)

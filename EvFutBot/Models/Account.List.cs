@@ -75,7 +75,7 @@ namespace EvFutBot.Models
             }
             catch (ArgumentException ex)
             {
-                await HandleException(ex, settings.SecurityDelay, settings.RunforHours, Email);
+                await HandleException(ex, settings.SecurityDelay, Email);
                 return 0;
             }
             catch (CaptchaTriggeredException ex)

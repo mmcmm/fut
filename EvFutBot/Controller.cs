@@ -58,7 +58,7 @@ namespace EvFutBot
             }
             catch (ArgumentException ex)
             {
-                await _account.HandleException(ex, _settings.SecurityDelay, _settings.RunforHours, _account.Email);
+                await _account.HandleException(ex, _settings.SecurityDelay, _account.Email);
             }
             catch (CaptchaTriggeredException ex)
             {

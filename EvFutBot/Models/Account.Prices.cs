@@ -143,7 +143,7 @@ namespace EvFutBot.Models
             }
             catch (ArgumentException ex)
             {
-                await HandleException(ex, settings.SecurityDelay, settings.RunforHours, Email);
+                await HandleException(ex, settings.SecurityDelay, Email);
                 return false;
             }
             catch (CaptchaTriggeredException ex)
@@ -213,7 +213,7 @@ namespace EvFutBot.Models
             }
             catch (ArgumentException ex)
             {
-                await HandleException(ex, settings.SecurityDelay, settings.RunforHours, Email);
+                await HandleException(ex, settings.SecurityDelay, Email);
                 return false;
             }
             catch (CaptchaTriggeredException ex)

@@ -93,7 +93,7 @@ namespace EvFutBot.Models
             catch (ArgumentException ex)
             {
                 MarkResetCard(card.TradeId);
-                await HandleException(ex, settings.SecurityDelay, settings.RunforHours, Email);
+                await HandleException(ex, settings.SecurityDelay, Email);
                 return false;
             }
             catch (CaptchaTriggeredException ex)
@@ -156,7 +156,7 @@ namespace EvFutBot.Models
                     catch (ArgumentException ex)
                     {
                         MarkResetCard(card.TradeId);
-                        await HandleException(ex, settings.SecurityDelay, settings.RunforHours, Email);
+                        await HandleException(ex, settings.SecurityDelay, Email);
                         return false;
                     }
                     catch (CaptchaTriggeredException ex)
@@ -250,7 +250,7 @@ namespace EvFutBot.Models
                 catch (ArgumentException ex)
                 {
                     MarkErrorCard("Relist Error!");
-                    await HandleException(ex, settings.SecurityDelay, settings.RunforHours, Email);
+                    await HandleException(ex, settings.SecurityDelay, Email);
                     return false;
                 }
                 catch (CaptchaTriggeredException ex)

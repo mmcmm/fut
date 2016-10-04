@@ -10,27 +10,33 @@ namespace EvFutBot.Models
 {
     public partial class Account
     {
-        public async Task HandleException(ArgumentException ex, int securityDelay, int runforHours, string email)
+        public async Task HandleException(ArgumentException ex, int securityDelay, string email)
         {
-            if (ShouldNotWork(_startedAt, runforHours))
+            var max = 1500;
+            if (ShouldNotWork(_startedAt, _runforHours))
             {
-                return;
+                max = securityDelay;
             }
             Disconnect();
             Logger.LogException(ex.Message, ex.ToString(), Email);
             var rand = new Random();
-            var randDelay = rand.Next(securityDelay/1000, 1500);
+            var randDelay = rand.Next(30, max);
             await Task.Delay(randDelay*1000);
             await LoginFut(false);
         }
 
         public async Task HandleException(ExpiredSessionException ex, int securityDelay, string email)
         {
+            var max = 1500;
+            if (ShouldNotWork(_startedAt, _runforHours))
+            {
+                max = securityDelay;
+            }
             Disconnect();
             Logger.LogException(ex.Message, ex.ToString(), Email);
 
             var rand = new Random();
-            var randDelay = rand.Next(securityDelay/1000, 1500);
+            var randDelay = rand.Next(30, max);
             await Task.Delay(randDelay*1000);
             await LoginFut();
         }
@@ -38,7 +44,13 @@ namespace EvFutBot.Models
         public async Task HandleException(CaptchaTriggeredException ex, string email)
         {
             Logger.LogException(ex.Message, ex.ToString(), Email);
-            await Task.Delay(TimeSpan.FromMinutes(120));
+
+            var max = 60;
+            if (ShouldNotWork(_startedAt, _runforHours))
+            {
+                max = 1;
+            }
+            await Task.Delay(TimeSpan.FromMinutes(max));
         }
 
         public async Task HandleException(HttpRequestException ex, int securityDelay, string email)
@@ -53,9 +65,14 @@ namespace EvFutBot.Models
             // mobile workaround to missing ExpiredSessionException
             if (ex.Message.IndexOf("401", StringComparison.Ordinal) != -1)
             {
+                var max = 1500;
+                if (ShouldNotWork(_startedAt, _runforHours))
+                {
+                    max = securityDelay;
+                }
                 Disconnect();
                 var rand = new Random();
-                var randDelay = rand.Next(securityDelay/1000, 1500);
+                var randDelay = rand.Next(30, max);
                 await Task.Delay(randDelay*1000);
                 await LoginFut();
             }
@@ -72,7 +89,7 @@ namespace EvFutBot.Models
         {
             try
             {
-                await Task.Delay(6*1000);
+                await Task.Delay(9*1000);
                 await _utClient.RemoveFromTradePileAsync(expiredCard);
             }
             catch (Exception)
