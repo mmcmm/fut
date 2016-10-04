@@ -45,7 +45,7 @@ namespace EvFutBot.Models
         {
             Logger.LogException(ex.Message, ex.ToString(), Email);
 
-            var max = 60;
+            var max = 30;
             if (ShouldNotWork(_startedAt, _runforHours))
             {
                 max = 1;
@@ -62,6 +62,17 @@ namespace EvFutBot.Models
                 Logger.LogException(ex.Message, ex.ToString(), Email);
                 await Task.Delay(securityDelay);
             }
+            // capthca
+            if(ex.Message.IndexOf("459", StringComparison.Ordinal) != -1)
+            {
+                var max = 30;
+                if (ShouldNotWork(_startedAt, _runforHours))
+                {
+                    max = 1;
+                }
+                await Task.Delay(TimeSpan.FromMinutes(max));
+            }
+
             // mobile workaround to missing ExpiredSessionException
             if (ex.Message.IndexOf("401", StringComparison.Ordinal) != -1)
             {
