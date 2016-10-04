@@ -277,11 +277,11 @@ namespace EvFutBot.Models
                         {
                             for (byte i = 3; i <= 6; i++) // we go over 3 pages
                             {
-                                await Task.Delay(settings.RmpDelay);
+                                await Task.Delay(settings.RmpDelay*3);
                                 await SearchAndBidPContracts(settings, _startedAt, i);
                             }
                             // we wait some more.
-                            await Task.Delay(settings.RmpDelay);
+                            await Task.Delay(settings.RmpDelay*3);
                         }
                         else
                         {
