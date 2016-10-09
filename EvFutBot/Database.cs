@@ -316,20 +316,24 @@ namespace EvFutBot
             using (var cmd = connection.CreateCommand())
             {
                 connection.Open();
-
-                cmd.CommandText = "SELECT status FROM panel WHERE platform=@platform LIMIT 0, 1";
+                
+                cmd.CommandText = "SELECT Count(*) as count, (SELECT Count(*) FROM panel WHERE platform=@platform) as total " +
+                                  "FROM panel WHERE platform=@platform AND status LIKE 'Working%'";
                 cmd.Prepare();
                 cmd.Parameters.AddWithValue("@platform", platform.ToString());
 
                 IDataReader reader = cmd.ExecuteReader();
 
-                var status = string.Empty;
+                var working = 0;
+                var total = 0;
                 while (reader.Read())
                 {
-                    status = (string) reader["status"];
+                    working = Convert.ToInt32(reader["count"]);
+                    total = Convert.ToInt32(reader["total"]);
+                    break;
                 }
 
-                return status.IndexOf("Working", StringComparison.Ordinal) != -1;
+                return working >= total/2;
             }
         }
 
