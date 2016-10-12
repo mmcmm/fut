@@ -18,7 +18,7 @@ namespace EvFutBot
     internal class Program
     {
         private static IScheduler _scheduler;
-        public static string Signature = "E"; // we use to make all servers updated
+        public static string Signature = "F"; // we use to make all servers updated
         public static string DevMachine = "DESKTOP-3A254DD";
         public static string WorkMachine = "WIN-76FUKLJMOIP";
 
@@ -90,7 +90,7 @@ namespace EvFutBot
                     _scheduler.ScheduleJob(webappjob, webapptrigger);
                     _scheduler.ScheduleJob(mobilejob, mobiletrigger); 
                     _scheduler.ScheduleJob(closeappjob, closeapptrigger);
-                    _scheduler.ScheduleJob(evoaddcardsjob, evoaddcardstrigger); 
+//                    _scheduler.ScheduleJob(evoaddcardsjob, evoaddcardstrigger); 
                 }
                 catch (SchedulerException ex)
                 {
