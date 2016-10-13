@@ -31,9 +31,9 @@ namespace EvFutBot
                 var rand = new Random();
                 var randDelay = rand.Next(60, 1500);
                 await Task.Delay(randDelay*1000);
-                loginResponse = await _account.LoginFut(i != 3 || i != 9); // we try without cookie
+                loginResponse = await _account.LoginFut(i != 3); // we try without cookie
 
-                if (i >= 9 && loginResponse == null) // we try 9 times
+                if (i >= 3 && loginResponse == null) // we try 3 times
                 {
                     Logger.LogException("To many login tries!", "", _account.Email);
                     return false;
