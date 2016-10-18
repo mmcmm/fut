@@ -41,7 +41,7 @@ namespace EvFutBot.Models
                         Update(panel, Credits, Panel.Statuses.Working, settings.RmpDelay);
 
                         // we price fitness and get new players
-                        await SearchAndPriceFitness(settings);                     
+                        await SearchAndPriceFitness(settings);
                         players = GetPlatformPlayers(Platform, reverse);
                     }
                     if (players.Count == 0) continue;
@@ -178,6 +178,7 @@ namespace EvFutBot.Models
         {
             var maxPrice = GetEaPrice(GetConsumablePrice(Platform, FitnessTeamDefId), 100);
             var lowestBinAvg = uint.MaxValue;
+            var lowestBinNr = Convert.ToByte(settings.LowestBinNr + 2);
 
             AuctionResponse searchResponse;
             var searchParameters = new DevelopmentSearchParameters
@@ -199,7 +200,7 @@ namespace EvFutBot.Models
                     await Task.Delay(settings.RmpDelayPrices);
                     searchResponse = await _utClient.SearchAsync(searchParameters);
                 }
-                while (searchResponse.AuctionInfo.Count < settings.LowestBinNr)
+                while (searchResponse.AuctionInfo.Count < lowestBinNr)
                 {
                     searchParameters.MaxBuy = AuctionInfo.CalculateNextBid(searchParameters.MaxBuy);
                     await Task.Delay(settings.RmpDelayPrices);
@@ -233,12 +234,12 @@ namespace EvFutBot.Models
             }
 
             searchResponse.AuctionInfo.Sort((x, y) => Convert.ToInt32(x.BuyNowPrice) - Convert.ToInt32(y.BuyNowPrice));
-            for (var i = 0; i < settings.LowestBinNr; i++)
+            for (var i = 0; i < lowestBinNr; i++)
             {
                 lowestBinAvg += searchResponse.AuctionInfo[i].BuyNowPrice;
             }
 
-            lowestBinAvg = lowestBinAvg/settings.LowestBinNr;
+            lowestBinAvg = lowestBinAvg/lowestBinNr;
             SaveConsumablePrice(Platform, FitnessTeamDefId, lowestBinAvg);
 
             return true;
