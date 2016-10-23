@@ -22,7 +22,7 @@ namespace EvFutBot.Models
 {
     public partial class Account
     {
-        public const uint SmallAccount = 4000;
+        public const uint SmallAccount = 3000;
         private const byte TradePileMax = 30;
         private const byte WatchListMax = 50;
         private const int QuickSellLimit = 900;
@@ -257,8 +257,12 @@ namespace EvFutBot.Models
                         Credits = await ClearTradePile(settings, _startedAt);
                         Update(panel, Credits, Panel.Statuses.Working, settings.RmpDelay);
 
-                        // we get new players and run fitness round here.
-                        await SearchAndBuyFitness(settings, _startedAt);
+                        // we get new players and run fitness round for oldgen here.
+                        if (Platform == Platform.Xbox360 || Platform == Platform.Ps3)
+                        {
+                            await SearchAndBuyFitness(settings, _startedAt);
+                        } 
+                                             
                         players = GetPotentialPlayers(settings.Batch, settings.MaxCardCost); // new players
                         while (players.Count == 0) // a fail safe
                         {
@@ -281,6 +285,8 @@ namespace EvFutBot.Models
                             {
                                 await Task.Delay(settings.RmpDelay*3);
                                 await SearchAndBidPContracts(settings, _startedAt, i);
+
+                                await SearchAndBuyFitness(settings, _startedAt); // a fitness round
                             }
                             // we wait some more.
                             await Task.Delay(settings.RmpDelay*3);

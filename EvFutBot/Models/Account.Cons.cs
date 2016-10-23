@@ -146,9 +146,7 @@ namespace EvFutBot.Models
         }
 
         public async Task<bool> SearchAndBuyFitness(Settings settings, DateTime startedAt)
-        {
-            if (Platform == Platform.Ps4) return false; //doesn't work for Ps4
-
+        {           
             var fitnessStdPrice = GetConsumablePrice(Platform, FitnessTeamDefId);
             if (fitnessStdPrice > Credits) return false;
 
