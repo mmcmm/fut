@@ -37,8 +37,8 @@ namespace EvFutBot.Services
                     UseSsl))
                 {
                     var rand = new Random();
-                    var randDelay = rand.Next(45, 60);
-                    await Task.Delay(randDelay*1000); // wait 45-60s  
+                    var randDelay = rand.Next(60, 90);
+                    await Task.Delay(randDelay*1000); // wait 60-90s  
 
                     var count = client.GetMessageCount();
                     int offset;
