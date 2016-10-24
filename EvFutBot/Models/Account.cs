@@ -266,8 +266,11 @@ namespace EvFutBot.Models
                         players = GetPotentialPlayers(settings.Batch, settings.MaxCardCost); // new players
                         while (players.Count == 0) // a fail safe
                         {
-                            await Task.Delay(settings.SecurityDelay);
-                            players = GetPotentialPlayers(settings.Batch, settings.MaxCardCost);
+                            if (Database.Tunnel == null) Database.SshConnect();
+                            Logger.LogException("Can't get Players", "", Email);
+
+                            await Task.Delay(settings.RmpDelay);
+                            players = GetPotentialPlayers(settings.Batch, settings.MaxCardCost); // new players
                         }
                     }
 
