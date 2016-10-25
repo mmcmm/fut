@@ -88,7 +88,7 @@ namespace EvFutBot.Models
                 AddCard(platform, card, Account.CardStatuses.New, order.Id);
             }
 
-            await Task.Delay(60*1000); // sleep 4 minutes  
+            await Task.Delay(60*1000); // sleep 1 minute 
             await CompleteOrder(platform, order);
         }
 

@@ -63,8 +63,7 @@ namespace EvFutBot.Models
                 // if we can't find the card we try again
                 if (searchResponse.AuctionInfo.Any(auction => auction.TradeId == card.TradeId) == false)
                 {
-                    searchParameters.Page = 1;
-                    await Task.Delay(settings.SecurityDelay);
+                    searchParameters.Page = 1;           
                     await Task.Delay(settings.RmpDelay);
                     searchResponse = await _utClient.SearchAsync(searchParameters);
 
