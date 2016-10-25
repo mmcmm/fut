@@ -87,13 +87,34 @@ namespace EvFutBot
             switch (_account.Status)
             {
                 case Account.Statuses.Coins:
-                    await _account.MakeCoins(_settings, _panel);
+                    try
+                    {
+                        await _account.MakeCoins(_settings, _panel);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogException(ex.Message, ex.ToString(), _account.Email);
+                    }                  
                     break;
                 case Account.Statuses.Prices:
-                    await _account.UpdatePrices(_settings, _panel);
+                    try
+                    {
+                        await _account.UpdatePrices(_settings, _panel);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogException(ex.Message, ex.ToString(), _account.Email);
+                    }
                     break;
                 case Account.Statuses.List:
-                    await _account.UpdateCardWeights(_settings, _panel);
+                    try
+                    {
+                        await _account.UpdateCardWeights(_settings, _panel);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogException(ex.Message, ex.ToString(), _account.Email);
+                    }
                     break;
                 default:
                     return false;
