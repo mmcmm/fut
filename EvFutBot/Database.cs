@@ -653,6 +653,30 @@ namespace EvFutBot
             }
         }
 
+        public static void ClearLog()
+        {
+            using (var connection = new MySqlConnection(Cs.GetConnectionString(true)))
+            using (var cmd = connection.CreateCommand())
+            {
+                connection.Open();
+
+                cmd.CommandText = "TRUNCATE log; ";
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        public static void ClearExceptions()
+        {
+            using (var connection = new MySqlConnection(Cs.GetConnectionString(true)))
+            using (var cmd = connection.CreateCommand())
+            {
+                connection.Open();
+
+                cmd.CommandText = "TRUNCATE exceptions; ";
+                cmd.ExecuteNonQuery();
+            }
+        }
+
         public static Dictionary<string, long> GetPlayerStatistics(uint assetId, uint baseId, byte rating,
             Platform platform)
         {

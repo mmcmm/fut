@@ -45,6 +45,12 @@ namespace EvFutBot.Services
                         });
                     }
                 }
+                // we do out weeckly cleaning 
+                if (DateTime.Now.DayOfWeek == DayOfWeek.Sunday)
+                {
+                   ClearLog();
+                   ClearExceptions();
+                }
                 return true;
             });
         }
@@ -271,6 +277,104 @@ namespace EvFutBot.Services
                     {
                         Thread.Sleep(30*1000);
                         Database.ClearPlayerStatistics();
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogException(ex.Message, ex.ToString());
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogException(ex.Message, ex.ToString());
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogException(ex.Message, ex.ToString());
+            }
+        }
+
+        private static void ClearLog()
+        {
+            try
+            {
+                Database.ClearLog();
+            }
+            catch (SshException)
+            {
+                try
+                {
+                    Thread.Sleep(30*1000);
+                    Database.SshConnect();
+                    Database.ClearLog();
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogException(ex.Message, ex.ToString());
+                }
+            }
+            catch (MySqlException)
+            {
+                try
+                {
+                    Thread.Sleep(30*1000);
+                    Database.ClearLog();
+                }
+                catch (MySqlException)
+                {
+                    try
+                    {
+                        Thread.Sleep(30*1000);
+                        Database.ClearLog();
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogException(ex.Message, ex.ToString());
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogException(ex.Message, ex.ToString());
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogException(ex.Message, ex.ToString());
+            }
+        }
+
+        private static void ClearExceptions()
+        {
+            try
+            {
+                Database.ClearExceptions();
+            }
+            catch (SshException)
+            {
+                try
+                {
+                    Thread.Sleep(30*1000);
+                    Database.SshConnect();
+                    Database.ClearExceptions();
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogException(ex.Message, ex.ToString());
+                }
+            }
+            catch (MySqlException)
+            {
+                try
+                {
+                    Thread.Sleep(30*1000);
+                    Database.ClearExceptions();
+                }
+                catch (MySqlException)
+                {
+                    try
+                    {
+                        Thread.Sleep(30*1000);
+                        Database.ClearExceptions();
                     }
                     catch (Exception ex)
                     {
