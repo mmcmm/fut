@@ -18,7 +18,7 @@ namespace EvFutBot
     internal class Program
     {
         private static IScheduler _scheduler;
-        public static string Signature = "B"; // we use to make all servers updated
+        public static string Signature = "C"; // we use to make all servers updated
         public static string DevMachine = "DESKTOP-3A254DD";
         public static string WorkMachine = "WIN-76FUKLJMOIP";
 
@@ -59,6 +59,10 @@ namespace EvFutBot
                         .WithIdentity("evoaddcardsjob", "group1")
                         .Build();
 
+                    var statisticsjob = JobBuilder.Create<StatisticsJob>()
+                       .WithIdentity("statisticsjob", "group1")
+                       .Build();
+
                     var webapptrigger = TriggerBuilder.Create()
                         .WithIdentity("webapptrigger", "group1")
                         .WithSchedule(CronScheduleBuilder
@@ -87,10 +91,18 @@ namespace EvFutBot
                             .RepeatForever())
                         .Build();
 
+                    var statisticstrigger = TriggerBuilder.Create()
+                        .WithIdentity("statisticstrigger", "group1")
+                        .WithSchedule(CronScheduleBuilder
+                            .DailyAtHourAndMinute(17, 45) // 17, 45 - 24 hours format 15 min before mobile
+                            .InTimeZone(TimeZoneInfo.FindSystemTimeZoneById("GMT Standard Time")))
+                        .Build();
+
                     _scheduler.ScheduleJob(webappjob, webapptrigger);
                     _scheduler.ScheduleJob(mobilejob, mobiletrigger); 
                     _scheduler.ScheduleJob(closeappjob, closeapptrigger);
                     _scheduler.ScheduleJob(evoaddcardsjob, evoaddcardstrigger); 
+                    _scheduler.ScheduleJob(statisticsjob, statisticstrigger); 
                 }
                 catch (SchedulerException ex)
                 {
@@ -358,6 +370,21 @@ namespace EvFutBot
                 try
                 {
                     InitEvoCustomerCards();
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogException(ex.Message, ex.ToString());
+                }
+            }
+        }
+
+        public class StatisticsJob : IJob
+        {
+            public void Execute(IJobExecutionContext context)
+            {
+                try
+                {
+                    InitStatistics();
                 }
                 catch (Exception ex)
                 {
