@@ -18,7 +18,7 @@ namespace EvFutBot
     internal class Program
     {
         private static IScheduler _scheduler;
-        public static string Signature = "C"; // we use to make all servers updated
+        public static string Signature = "D"; // we use to make all servers updated
         public static string DevMachine = "DESKTOP-3A254DD";
         public static string WorkMachine = "WIN-76FUKLJMOIP";
 
@@ -38,7 +38,7 @@ namespace EvFutBot
                     _scheduler = new StdSchedulerFactory(new NameValueCollection
                     {
                         {"quartz.scheduler.instanceName", "MainScheduler"},
-                        {"quartz.threadPool.threadCount", "4"}, // change when adding jobs
+                        {"quartz.threadPool.threadCount", "5"}, // change when adding jobs
                         {"quartz.jobStore.type", "Quartz.Simpl.RAMJobStore, Quartz"}
                     }).GetScheduler();
                     _scheduler.Start();
