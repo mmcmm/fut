@@ -22,7 +22,7 @@ namespace EvFutBot.Models
 {
     public partial class Account
     {
-        public const uint SmallAccount = 3000;
+        public const uint SmallAccount = 2000;
         private const byte TradePileMax = 30;
         private const byte WatchListMax = 50;
         private const int QuickSellLimit = 900;
@@ -258,7 +258,7 @@ namespace EvFutBot.Models
                         Update(panel, Credits, Panel.Statuses.Working, settings.RmpDelay);
 
                         // we get new players and run fitness round for oldgen here.
-                        if (Platform == Platform.Xbox360 || Platform == Platform.Ps3)
+                        if (Credits <= SmallAccount*2 || Platform == Platform.Xbox360 || Platform == Platform.Ps3)
                         {
                             await SearchAndBuyFitness(settings, _startedAt);
                         } 
