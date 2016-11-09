@@ -18,13 +18,13 @@ namespace EvFutBot
     internal class Program
     {
         private static IScheduler _scheduler;
-        public static string Signature = "F"; // we use to make all servers updated
+        public static string Signature = "G"; // we use to make all servers updated
         public static string DevMachine = "DESKTOP-3A254DD";
         public static string WorkMachine = "WIN-76FUKLJMOIP";
 
         private static void Main()
         {
-            if (Environment.MachineName == "WIN-UCXLTNMDMVJ")
+            if (Environment.MachineName == DevMachine)
             {
 //                InitUpdateBaseIds();
 //                InitStatistics();
