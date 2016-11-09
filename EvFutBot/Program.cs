@@ -24,7 +24,7 @@ namespace EvFutBot
 
         private static void Main()
         {
-            if (Environment.MachineName == DevMachine)
+            if (Environment.MachineName == "WIN-UCXLTNMDMVJ")
             {
 //                InitUpdateBaseIds();
 //                InitStatistics();
