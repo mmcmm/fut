@@ -4,10 +4,15 @@ namespace EvFutBot.Models
 {
     public class Settings
     {
+        private readonly byte[] _rpmDelayRange;
+        private readonly Random _rand;
+
         public Settings(byte[] runforHours, byte[] rpmDelay, byte buyPercent, byte sellPercent,
             byte maxAccounts, byte batch, uint maxCredits, byte securityDelay, byte maxCardCost,
             byte lowestBinNr)
         {
+            _rand = new Random();
+
             BinPercent = buyPercent;
             BidPercent = buyPercent;
             SellPercent = sellPercent;
@@ -21,11 +26,9 @@ namespace EvFutBot.Models
             if (rpmDelay[0] < 4)
                 throw new ArgumentOutOfRangeException(nameof(rpmDelay), "RPM Delay to small");
 
-            var rand = new Random();
-            RmpDelay = rand.Next(rpmDelay[0]*1000, rpmDelay[1]*1000);
-            RmpDelayLow = 6*1000; // 6 seconds
+            _rpmDelayRange = rpmDelay;
             PreBidDelay = 0; // no delay
-            RunforHours = rand.Next(runforHours[0], runforHours[1]);
+            RunforHours = _rand.Next(runforHours[0], runforHours[1]);
             RmpDelayPrices = Convert.ToInt32(60/((decimal) 4900/RunforHours/60)*1000); // 5000 request limit per day
         }
 
@@ -39,8 +42,9 @@ namespace EvFutBot.Models
         public byte MaxCardCost { get; set; }
         public byte LowestBinNr { get; set; }
         public int SecurityDelay { get; private set; }
-        public int RmpDelay { get; }
-        public int RmpDelayLow { get; private set; }
+
+        public int RmpDelay => _rand.Next(_rpmDelayRange[0]*1000, _rpmDelayRange[1]*1000);
+        public int RmpDelayLow => _rand.Next(3*1000, 9*1000);
         public int RmpDelayPrices { get; private set; }
         public int PreBidDelay { get; private set; }
     }

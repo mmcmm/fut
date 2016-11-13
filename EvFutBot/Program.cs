@@ -18,7 +18,7 @@ namespace EvFutBot
     internal class Program
     {
         private static IScheduler _scheduler;
-        public static string Signature = "A"; // we use to make all servers updated
+        public static string Signature = "B"; // we use to make all servers updated
         public static string DevMachine = "DESKTOP-3A254DD";
         public static string WorkMachine = "WIN-76FUKLJMOIP";
 
@@ -73,14 +73,14 @@ namespace EvFutBot
                     var mobiletrigger = TriggerBuilder.Create()
                         .WithIdentity("mobiletrigger", "group1")
                         .WithSchedule(CronScheduleBuilder
-                            .DailyAtHourAndMinute(18, 00) // 18, 00 - 24 hours format 
+                            .DailyAtHourAndMinute(19, 00) // 19, 00 - 24 hours format 
                             .InTimeZone(TimeZoneInfo.FindSystemTimeZoneById("GMT Standard Time")))
                         .Build();
 
                     var closeapptrigger = TriggerBuilder.Create()
                         .WithIdentity("closeapptrigger", "group1")
                         .WithSchedule(CronScheduleBuilder
-                            .DailyAtHourAndMinute(03, 15) // 03, 15 - 24 hours format 
+                            .DailyAtHourAndMinute(05, 30) // 05, 30 - 24 hours format 
                             .InTimeZone(TimeZoneInfo.FindSystemTimeZoneById("GMT Standard Time")))
                         .Build();
 
