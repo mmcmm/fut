@@ -6,6 +6,7 @@ namespace EvFutBot.Models
     {
         private readonly byte _batch;
         private readonly Random _rand;
+        private readonly int _rmpDelayPrices;
         private readonly byte[] _rpmDelayRange;
 
         public Settings(byte[] runforHours, byte[] rpmDelay, byte buyPercent, byte sellPercent,
@@ -30,7 +31,7 @@ namespace EvFutBot.Models
             _rpmDelayRange = rpmDelay;
             PreBidDelay = 0; // no delay
             RunforHours = _rand.Next(runforHours[0], runforHours[1]);
-            RmpDelayPrices = Convert.ToInt32(60/((decimal) 4900/RunforHours/60)*1000); // 5000 request limit per day
+            _rmpDelayPrices = Convert.ToInt32(60/((decimal) 4900/RunforHours/60)*1000); // 5000 request limit per day
         }
 
         public int RunforHours { get; }
@@ -46,7 +47,7 @@ namespace EvFutBot.Models
 
         public int RmpDelay => _rand.Next(_rpmDelayRange[0]*1000, _rpmDelayRange[1]*1000);
         public int RmpDelayLow => _rand.Next(3*1000, 9*1000);
-        public int RmpDelayPrices { get; private set; }
+        public int RmpDelayPrices => _rand.Next(_rmpDelayPrices/2, _rmpDelayPrices + _rmpDelayPrices/2 + 1);
         public int PreBidDelay { get; private set; }
     }
 }
