@@ -4,8 +4,9 @@ namespace EvFutBot.Models
 {
     public class Settings
     {
-        private readonly byte[] _rpmDelayRange;
+        private readonly byte _batch;
         private readonly Random _rand;
+        private readonly byte[] _rpmDelayRange;
 
         public Settings(byte[] runforHours, byte[] rpmDelay, byte buyPercent, byte sellPercent,
             byte maxAccounts, byte batch, uint maxCredits, byte securityDelay, byte maxCardCost,
@@ -17,7 +18,7 @@ namespace EvFutBot.Models
             BidPercent = buyPercent;
             SellPercent = sellPercent;
             MaxAccounts = maxAccounts;
-            Batch = batch;
+            _batch = batch;
             MaxCredits = maxCredits;
             MaxCardCost = maxCardCost;
             LowestBinNr = lowestBinNr;
@@ -37,7 +38,7 @@ namespace EvFutBot.Models
         public byte BidPercent { get; private set; }
         public byte SellPercent { get; private set; }
         public byte MaxAccounts { get; private set; }
-        public byte Batch { get; private set; }
+        public int Batch => _rand.Next(_batch/2, _batch + _batch/2 + 1);
         public uint MaxCredits { get; private set; }
         public byte MaxCardCost { get; set; }
         public byte LowestBinNr { get; set; }

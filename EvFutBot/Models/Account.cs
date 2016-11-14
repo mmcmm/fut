@@ -160,7 +160,7 @@ namespace EvFutBot.Models
             return Credits;
         }
 
-        public List<Player> GetPotentialPlayers(byte batch, byte maxCardCost)
+        public List<Player> GetPotentialPlayers(int batch, byte maxCardCost)
         {
             try
             {
@@ -587,7 +587,7 @@ namespace EvFutBot.Models
             }
 
             // clear any useless cards in the account that clog the tradepile
-            string[] protectedTypes = {"player", "contract", "health"};
+            string[] protectedTypes = {"player", "contract"};
             foreach (var card in tradePileList.AuctionInfo.Where(
                 card => (card.ItemData.ItemType == "player" && card.ItemData.Rating <= 70)
                         || !protectedTypes.Contains(card.ItemData.ItemType)))

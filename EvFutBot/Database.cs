@@ -98,7 +98,7 @@ namespace EvFutBot
             }
         }
 
-        public static List<Player> GetPlayers(byte max, uint maxPrice, Platform platform)
+        public static List<Player> GetPlayers(int max, uint maxPrice, Platform platform)
         {
             using (var connection = new MySqlConnection(Cs.GetConnectionString(true)))
             using (var cmd = connection.CreateCommand())
@@ -360,7 +360,7 @@ namespace EvFutBot
             }
         }
 
-        private static uint[] GetRandAssetIds(List<uint> allAssetIds, byte max)
+        private static uint[] GetRandAssetIds(List<uint> allAssetIds, int max)
         {
             var rand = new Random();
             max = max > allAssetIds.Count ? Convert.ToByte(allAssetIds.Count) : max;
