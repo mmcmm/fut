@@ -128,7 +128,7 @@ namespace EvFutBot.Models
                     try
                     {
                         if (auction.TradeId != card.TradeId) continue;
-                        await Task.Delay(settings.PreBidDelay);
+                        await Task.Delay(settings.RmpDelay);
                         placeBid = await _utClient.PlaceBidAsync(auction, card.Bin);
                         if (placeBid.AuctionInfo == null)
                         {
@@ -194,14 +194,14 @@ namespace EvFutBot.Models
                             {
                                 try
                                 {
-                                    await Task.Delay(settings.RmpDelayLow);
+                                    await Task.Delay(settings.RmpDelay*4);
                                     await _utClient.QuickSellItemAsync(boughtAction.ItemData.Id);
                                 }
                                 catch (Exception ex)
                                 {
                                     try
                                     {
-                                        await Task.Delay(settings.RmpDelay);
+                                        await Task.Delay(settings.RmpDelay*4);
                                         await _utClient.ListAuctionAsync(new AuctionDetails(boughtAction.ItemData.Id,
                                             GetAuctionDuration(startedAt, settings.RunforHours, Login), 
                                             boughtAction.ItemData.MarketDataMinPrice, boughtAction.ItemData.MarketDataMaxPrice));
@@ -225,7 +225,7 @@ namespace EvFutBot.Models
 
                             if (auctionDetails != null)
                             {
-                                await Task.Delay(settings.RmpDelay);
+                                await Task.Delay(settings.RmpDelay*4);
                                 await _utClient.ListAuctionAsync(auctionDetails);
                             }
                         }

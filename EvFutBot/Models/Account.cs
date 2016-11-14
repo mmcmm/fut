@@ -256,12 +256,6 @@ namespace EvFutBot.Models
                         await ClearWatchList(settings, _startedAt);
                         Credits = await ClearTradePile(settings, _startedAt);
                         Update(panel, Credits, Panel.Statuses.Working, settings.RmpDelay);
-
-                        // we get new players and run fitness round for oldgen here.
-                        if (Credits <= SmallAccount*2 || Platform == Platform.Xbox360 || Platform == Platform.Ps3)
-                        {
-                            await SearchAndBuyFitness(settings, _startedAt);
-                        } 
                                              
                         players = GetPotentialPlayers(settings.Batch, settings.MaxCardCost); // new players
                         while (players.Count == 0) // a fail safe
@@ -276,8 +270,6 @@ namespace EvFutBot.Models
 
                     if (Credits <= SmallAccount)
                     {
-                        await SearchAndBuyFitness(settings, _startedAt); // a fitness round
-
                         var tradePileSize = await GetTradePileSize(settings);
                         var watchListSize = await GetWatchListSize(settings);
 
@@ -286,17 +278,13 @@ namespace EvFutBot.Models
                         {
                             for (byte i = 3; i <= 6; i++) // we go over 3 pages
                             {
-                                await Task.Delay(settings.RmpDelay*3);
+                                await Task.Delay(settings.RmpDelay*4);
                                 await SearchAndBidPContracts(settings, _startedAt, i);
-
-                                await SearchAndBuyFitness(settings, _startedAt); // a fitness round
                             }
-                            // we wait some more.
-                            await Task.Delay(settings.RmpDelay*3);
                         }
                         else
                         {
-                            await Task.Delay(settings.SecurityDelay*10);
+                            await Task.Delay(settings.SecurityDelay*12);
                             await ClearWatchList(settings, _startedAt);
                             Credits = await ClearTradePile(settings, _startedAt);
                         }
@@ -387,11 +375,6 @@ namespace EvFutBot.Models
 
                         if (tradeItem != null)
                         {
-                            await Task.Delay(settings.RmpDelay);
-                            await _utClient.ListAuctionAsync(new AuctionDetails(boughtAction.ItemData.Id,
-                                GetAuctionDuration(startedAt, settings.RunforHours, Login),
-                                CalculateBidPrice(sellPrice, settings.SellPercent), sellPrice));
-
                             Logger.LogTransaction(Email, boughtAction.ItemData.LastSalePrice,
                                 boughtAction.ItemData.Rating, boughtAction.ItemData.AssetId,
                                 tradePileResponse.ItemData.Count, Logger.Labels.Bought, Platform);
@@ -650,11 +633,8 @@ namespace EvFutBot.Models
             {
                 try
                 {
-                    // we lower price if trade pile gets full 
-                    var sellPrice = expiredCard.BuyNowPrice == 0
-                        ? GetWonBidPrice(expiredCard.ItemData.AssetId, expiredCard.ItemData.LastSalePrice,
-                            expiredCard.ItemData.Rating, settings.SellPercent)
-                        : AuctionInfo.CalculatePreviousBid(expiredCard.BuyNowPrice);
+                    var sellPrice = GetWonBidPrice(expiredCard.ItemData.AssetId, expiredCard.ItemData.LastSalePrice,
+                            expiredCard.ItemData.Rating, settings.SellPercent);
                     // if the card doesn't sell we quick sell it
                     if (sellPrice <= expiredCard.ItemData.MarketDataMinPrice)
                     {

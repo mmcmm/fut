@@ -783,47 +783,6 @@ namespace EvFutBot
             }
         }
 
-        public static uint GetConsumablePrice(uint definitionId, string platform)
-        {
-            using (var connection = new MySqlConnection(Cs.GetConnectionString(true)))
-            using (var cmd = connection.CreateCommand())
-            {
-                connection.Open();
-
-                cmd.CommandText = $"SELECT std_price{platform} as std_price FROM consumables " +
-                                  $"WHERE definition_id=@definition_id AND status = '{Player.Statuses.Active}' LIMIT 0, 1";
-                cmd.Prepare();
-                cmd.Parameters.AddWithValue("@definition_id", definitionId);
-
-                IDataReader reader = cmd.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    return Convert.ToUInt32(reader["std_price"]);
-                }
-                return 0;
-            }
-        }
-
-        public static void SaveConsumablePrice(uint definitionId, string platform, uint price)
-        {
-            using (var connection = new MySqlConnection(Cs.GetConnectionString(true)))
-            using (var cmd = connection.CreateCommand())
-            {
-                connection.Open();
-
-                cmd.CommandText =
-                    $"UPDATE consumables SET std_price{platform}=@price WHERE definition_id=@definition_id";
-
-                cmd.Prepare();
-                cmd.Parameters.AddWithValue("@price", price);
-                cmd.Parameters.AddWithValue("@definition_id", definitionId);
-
-                cmd.ExecuteNonQuery();
-            }
-        }
-
-
         public static void SshConnect()
         {
             var ci = new ConnectionInfo(DbHost, SshUser,
