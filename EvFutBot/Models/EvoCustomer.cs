@@ -83,12 +83,12 @@ namespace EvFutBot.Models
             var rand = new Random();
             foreach (var card in cards)
             {
-                var randDelay = rand.Next(60, 180);
+                var randDelay = rand.Next(30, 90);
                 Thread.Sleep(randDelay*1000); // sleep 2-3 minutes                       
                 AddCard(platform, card, Account.CardStatuses.New, order.Id);
             }
 
-            await Task.Delay(120*1000); // sleep 2 minute 
+            await Task.Delay(60*1000); // sleep 2 minute 
             await CompleteOrder(platform, order);
         }
 
