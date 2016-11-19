@@ -18,6 +18,7 @@ namespace EvFutBot
     internal class Program
     {
         private static IScheduler _scheduler;
+        private static List<Account> _accountsInWork;
         public static string Signature = "C"; // we use to make all servers updated
         public static string DevMachine = "DESKTOP-3A254DD";
         public static string WorkMachine = "WIN-76FUKLJMOIP";
@@ -38,7 +39,7 @@ namespace EvFutBot
                     _scheduler = new StdSchedulerFactory(new NameValueCollection
                     {
                         {"quartz.scheduler.instanceName", "MainScheduler"},
-                        {"quartz.threadPool.threadCount", "5"}, // change when adding jobs
+                        {"quartz.threadPool.threadCount", "6"}, // change when adding jobs
                         {"quartz.jobStore.type", "Quartz.Simpl.RAMJobStore, Quartz"}
                     }).GetScheduler();
                     _scheduler.Start();
@@ -60,8 +61,12 @@ namespace EvFutBot
                         .Build();
 
                     var statisticsjob = JobBuilder.Create<StatisticsJob>()
-                       .WithIdentity("statisticsjob", "group1")
-                       .Build();
+                        .WithIdentity("statisticsjob", "group1")
+                        .Build();
+
+                    var resetcardsperhourjob = JobBuilder.Create<ResetCardsPerHourJob>()
+                        .WithIdentity("resetcardsperhourjob", "group1")
+                        .Build();
 
                     var webapptrigger = TriggerBuilder.Create()
                         .WithIdentity("webapptrigger", "group1")
@@ -98,11 +103,19 @@ namespace EvFutBot
                             .InTimeZone(TimeZoneInfo.FindSystemTimeZoneById("GMT Standard Time")))
                         .Build();
 
+                    var resetcardsperhourtrigger = TriggerBuilder.Create()
+                        .WithIdentity("resetcardsperhourtrigger", "group1")
+                        .WithSimpleSchedule(x => x
+                            .WithIntervalInMinutes(60) // every 60 min
+                            .RepeatForever())
+                        .Build();
+
                     _scheduler.ScheduleJob(webappjob, webapptrigger);
-                    _scheduler.ScheduleJob(mobilejob, mobiletrigger); 
+                    _scheduler.ScheduleJob(mobilejob, mobiletrigger);
                     _scheduler.ScheduleJob(closeappjob, closeapptrigger);
-                    _scheduler.ScheduleJob(evoaddcardsjob, evoaddcardstrigger); 
-                    _scheduler.ScheduleJob(statisticsjob, statisticstrigger); 
+                    _scheduler.ScheduleJob(evoaddcardsjob, evoaddcardstrigger);
+                    _scheduler.ScheduleJob(statisticsjob, statisticstrigger);
+                    _scheduler.ScheduleJob(resetcardsperhourjob, resetcardsperhourtrigger);
                 }
                 catch (SchedulerException ex)
                 {
@@ -137,6 +150,7 @@ namespace EvFutBot
                 i++;
             }
 
+            _accountsInWork = accounts;
             var taskList = new List<Task>();
             foreach (var accountTask in accounts.Select(account => new Task<bool>(() =>
                 new Controller(account, settings).LoginAndWork().Result, TaskCreationOptions.LongRunning)))
@@ -318,6 +332,14 @@ namespace EvFutBot
             Task.WaitAll(taskList.ToArray());
         }
 
+        private static void InitResetCardsPerHour()
+        {
+            foreach (var account in _accountsInWork)
+            {
+                account.ResetCardsPerHour();
+            }
+        }
+
         // we use 1 server for work stuff
         public static bool DevOrWork()
         {
@@ -385,6 +407,21 @@ namespace EvFutBot
                 try
                 {
                     InitStatistics();
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogException(ex.Message, ex.ToString());
+                }
+            }
+        }
+
+        public class ResetCardsPerHourJob : IJob
+        {
+            public void Execute(IJobExecutionContext context)
+            {
+                try
+                {
+                    InitResetCardsPerHour();
                 }
                 catch (Exception ex)
                 {

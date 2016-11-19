@@ -84,6 +84,7 @@ namespace EvFutBot.Models
 
                     if (boughtAction != null && boughtAction.TradeState == "closed")
                     {
+                        _cardsPerHour++;
                         await Task.Delay(settings.RmpDelay);
                         var tradePileResponse =
                             await _utClient.SendItemToTradePileAsync(boughtAction.ItemData);

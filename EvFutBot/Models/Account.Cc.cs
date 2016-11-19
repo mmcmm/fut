@@ -63,7 +63,7 @@ namespace EvFutBot.Models
                 // if we can't find the card we try again
                 if (searchResponse.AuctionInfo.Any(auction => auction.TradeId == card.TradeId) == false)
                 {
-                    searchParameters.Page = 1;           
+                    searchParameters.Page = 1;
                     await Task.Delay(settings.RmpDelay);
                     searchResponse = await _utClient.SearchAsync(searchParameters);
 
@@ -183,12 +183,12 @@ namespace EvFutBot.Models
                         MarkBoughtCard(card.TradeId); // deal one.. now relisting
 
                         await Task.Delay(settings.RmpDelayLow);
-                        var tradePileResponse =
-                            await _utClient.SendItemToTradePileAsync(boughtAction.ItemData);
+                        var tradePileResponse = await _utClient.SendItemToTradePileAsync(boughtAction.ItemData);
                         var tradeItem = tradePileResponse.ItemData.FirstOrDefault();
 
                         if (tradeItem != null)
                         {
+                            _cardsPerHour++;
                             AuctionDetails auctionDetails = null;
                             if (card.Value <= QuickSellLimit)
                             {
@@ -203,8 +203,9 @@ namespace EvFutBot.Models
                                     {
                                         await Task.Delay(settings.RmpDelay*4);
                                         await _utClient.ListAuctionAsync(new AuctionDetails(boughtAction.ItemData.Id,
-                                            GetAuctionDuration(startedAt, settings.RunforHours, Login), 
-                                            boughtAction.ItemData.MarketDataMinPrice, boughtAction.ItemData.MarketDataMaxPrice));
+                                            GetAuctionDuration(startedAt, settings.RunforHours, Login),
+                                            boughtAction.ItemData.MarketDataMinPrice,
+                                            boughtAction.ItemData.MarketDataMaxPrice));
                                     }
                                     catch (Exception)
                                     {

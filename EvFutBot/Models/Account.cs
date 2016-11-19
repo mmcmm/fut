@@ -26,6 +26,7 @@ namespace EvFutBot.Models
         private const byte TradePileMax = 30;
         private const byte WatchListMax = 50;
         private const int QuickSellLimit = 900;
+        private const int MaxCardsPerHour = 5;
 
         private readonly string _cookie;
         private readonly string _gpassword; // gmail password
@@ -35,8 +36,10 @@ namespace EvFutBot.Models
         public readonly string Email;
         public readonly string Gmail;
         public readonly Platform Platform;
-        private DateTime _startedAt;
+
+        private byte _cardsPerHour;
         private int _runforHours;
+        private DateTime _startedAt;
         private FutClient _utClient;
 
         public Account(uint id, string email, string password, string utSecurityAnswer, string platform,
@@ -132,7 +135,7 @@ namespace EvFutBot.Models
             {
                 var rand = new Random();
                 var randDelay = rand.Next(60, 240);
-                await HandleException(ex, randDelay, Email); 
+                await HandleException(ex, randDelay, Email);
                 return null;
             }
             catch (CaptchaTriggeredException ex)
@@ -256,7 +259,7 @@ namespace EvFutBot.Models
                         await ClearWatchList(settings, _startedAt);
                         Credits = await ClearTradePile(settings, _startedAt);
                         Update(panel, Credits, Panel.Statuses.Working, settings.RmpDelay);
-                                             
+
                         players = GetPotentialPlayers(settings.Batch, settings.MaxCardCost); // new players
                         while (players.Count == 0) // a fail safe
                         {
@@ -267,7 +270,14 @@ namespace EvFutBot.Models
                             players = GetPotentialPlayers(settings.Batch, settings.MaxCardCost); // new players
                         }
                     }
+                    // ban safety no more than 5 cards per hour
+                    if (_cardsPerHour >= MaxCardsPerHour)
+                    {
+                        await Task.Delay(settings.RmpDelay*20);
+                        players.Clear();
 
+                        continue;
+                    }
                     if (Credits <= SmallAccount)
                     {
                         var tradePileSize = await GetTradePileSize(settings);
@@ -278,13 +288,13 @@ namespace EvFutBot.Models
                         {
                             for (byte i = 3; i <= 6; i++) // we go over 3 pages
                             {
-                                await Task.Delay(settings.RmpDelay*4);
+                                await Task.Delay(settings.RmpDelay*5);
                                 await SearchAndBidPContracts(settings, _startedAt, i);
                             }
                         }
                         else
                         {
-                            await Task.Delay(settings.SecurityDelay*12);
+                            await Task.Delay(settings.SecurityDelay*10);
                             await ClearWatchList(settings, _startedAt);
                             Credits = await ClearTradePile(settings, _startedAt);
                         }
@@ -369,6 +379,7 @@ namespace EvFutBot.Models
 
                     if (boughtAction != null && boughtAction.TradeState == "closed")
                     {
+                        _cardsPerHour++;
                         await Task.Delay(settings.RmpDelay);
                         var tradePileResponse = await _utClient.SendItemToTradePileAsync(boughtAction.ItemData);
                         var tradeItem = tradePileResponse.ItemData.FirstOrDefault();
@@ -634,7 +645,7 @@ namespace EvFutBot.Models
                 try
                 {
                     var sellPrice = GetWonBidPrice(expiredCard.ItemData.AssetId, expiredCard.ItemData.LastSalePrice,
-                            expiredCard.ItemData.Rating, settings.SellPercent);
+                        expiredCard.ItemData.Rating, settings.SellPercent);
                     // if the card doesn't sell we quick sell it
                     if (sellPrice <= expiredCard.ItemData.MarketDataMinPrice)
                     {
@@ -1261,6 +1272,11 @@ namespace EvFutBot.Models
         public void Disconnect()
         {
             _utClient = null;
+        }
+
+        public void ResetCardsPerHour()
+        {
+            _cardsPerHour = 0;
         }
     }
 }
