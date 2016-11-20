@@ -92,7 +92,7 @@ namespace EvFutBot
                     var evoaddcardstrigger = TriggerBuilder.Create()
                         .WithIdentity("evoaddcardstrigger", "group1")
                         .WithSimpleSchedule(x => x
-                            .WithIntervalInMinutes(5) // every 5 min
+                            .WithIntervalInMinutes(15) // every 15 min
                             .RepeatForever())
                         .Build();
 
