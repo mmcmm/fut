@@ -26,7 +26,7 @@ namespace EvFutBot.Models
         private const byte TradePileMax = 30;
         private const byte WatchListMax = 50;
         private const int QuickSellLimit = 900;
-        private const int MaxCardsPerHour = 5;
+        private const int MaxCardsPerHour = 4;
 
         private readonly string _cookie;
         private readonly string _gpassword; // gmail password
