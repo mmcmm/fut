@@ -273,7 +273,7 @@ namespace EvFutBot.Models
                     // ban safety no more than 5 cards per hour
                     if (_cardsPerHour >= MaxCardsPerHour)
                     {
-                        await Task.Delay(settings.RmpDelay*20);
+                        await Task.Delay(settings.RmpDelay*10);
                         players.Clear();
 
                         continue;

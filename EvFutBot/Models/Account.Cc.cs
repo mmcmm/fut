@@ -17,9 +17,8 @@ namespace EvFutBot.Models
     {
         public async Task BuyCustomerCards(Settings settings, DateTime startedAt)
         {
-            if (Credits <= SmallAccount) return;
             var tosell = Credits - SmallAccount;
-            if (tosell < 10000) return;
+            if (Credits <= SmallAccount || _cardsPerHour >= MaxCardsPerHour || tosell < 10000) return;
             var cards = GetCustomerCards(tosell);
             if (cards.Count == 0) return;
 
