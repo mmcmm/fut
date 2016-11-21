@@ -19,7 +19,7 @@ namespace EvFutBot
     {
         private static IScheduler _scheduler;
         private static List<Account> _accountsInWork;
-        public static string Signature = "A"; // we use to make all servers updated
+        public static string Signature = "B"; // we use to make all servers updated
         public static string DevMachine = "DESKTOP-3A254DD";
         public static string WorkMachine = "WIN-76FUKLJMOIP";
 
@@ -224,8 +224,7 @@ namespace EvFutBot
 
         private static Settings GetSettings()
         {
-            var settings = new Settings(new byte[] {9, 9}, new byte[] {10, 10}, 85, 100, 50, 15, 4000000, 120, 100,
-                3);
+            var settings = new Settings(new byte[] {10, 10}, new byte[] {5, 15}, 85, 100, 50, 10, 8000000, 120, 100, 3);
             if (Database.Tunnel == null) Database.SshConnect();
 
             try
@@ -334,6 +333,7 @@ namespace EvFutBot
 
         private static void InitResetCardsPerHour()
         {
+            if (_accountsInWork == null) return;
             foreach (var account in _accountsInWork)
             {
                 account.ResetCardsPerHour();
