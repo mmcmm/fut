@@ -26,7 +26,7 @@ namespace EvFutBot.Models
         private const byte TradePileMax = 30;
         private const byte WatchListMax = 50;
         private const int QuickSellLimit = 900;
-        private readonly int MaxCardsPerHour = 6;
+        private const int MaxCardsPerHour = 5;
 
         private readonly string _cookie;
         private readonly string _gpassword; // gmail password
@@ -56,8 +56,6 @@ namespace EvFutBot.Models
             _utSecurityAnswer = utSecurityAnswer.Trim();
             Platform = GetToolkitPlatform(platform);
             _cookie = CookieUtil.Dir + "\\" + Login + "_" + Email + "_cookie.dat";
-
-            if (Environment.MachineName == "WIN-KDGBHQJKN05") MaxCardsPerHour = 7; // todo temp test
         }
 
         public AppVersion Login { get; set; }
@@ -296,7 +294,7 @@ namespace EvFutBot.Models
                         }
                         else
                         {
-                            await Task.Delay(settings.SecurityDelay*10);
+                            await Task.Delay(settings.SecurityDelay*15);
                             await ClearWatchList(settings, _startedAt);
                             Credits = await ClearTradePile(settings, _startedAt);
                         }
