@@ -273,7 +273,7 @@ namespace EvFutBot.Models
                     // ban safety no more than 5 cards per hour
                     if (_cardsPerHour >= MaxCardsPerHour)
                     {
-                        await Task.Delay(settings.RmpDelay*10);
+                        await Task.Delay(settings.RmpDelay*15);
                         players.Clear();
 
                         continue;
@@ -294,7 +294,7 @@ namespace EvFutBot.Models
                         }
                         else
                         {
-                            await Task.Delay(settings.SecurityDelay*15);
+                            await Task.Delay(settings.SecurityDelay*10);
                             await ClearWatchList(settings, _startedAt);
                             Credits = await ClearTradePile(settings, _startedAt);
                         }
