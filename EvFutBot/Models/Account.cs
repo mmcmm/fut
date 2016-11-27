@@ -792,6 +792,12 @@ namespace EvFutBot.Models
             {
                 try
                 {
+                    if (purchasedCard.ItemType == "kit")
+                    {
+                        await Task.Delay(settings.RmpDelayLow);
+                        await _utClient.QuickSellItemAsync(purchasedCard.Id);
+                        continue;
+                    }
                     await Task.Delay(settings.RmpDelayLow);
                     await _utClient.SendItemToTradePileAsync(purchasedCard);
 
