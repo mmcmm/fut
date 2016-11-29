@@ -46,6 +46,8 @@ namespace UltimateTeam.Toolkit.Constants
 
         public const string BaseShowoff = "http://www.easports.com/iframe/fut17/?baseShowoffUrl=https%3A%2F%2Fwww.easports.com%2Fuk%2Ffifa%2Fultimate-team%2Fweb-app%2Fshow-off&guest_app_uri=http%3A%2F%2Fwww.easports.com%2Fuk%2Ffifa%2Fultimate-team%2Fweb-app&locale=en_GB";
 
+        public const string PinRiver = "https://pin-river.data.ea.com/pinEvents";
+
         public const string CaptchaImage = "https://www.easports.com/iframe/fut17/p/ut/captcha/img?token=AAAA&_={0}";
 
         public const string CaptchaValidate = "https://www.easports.com/iframe/fut17/p/ut/captcha/validate";

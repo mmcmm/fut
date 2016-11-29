@@ -59,6 +59,7 @@
     <Compile Include="Constants\NonStandardHttpHeaders.cs" />
     <Compile Include="Constants\Currency.cs" />
     <Compile Include="Constants\Pile.cs" />
+    <Compile Include="Constants\PinEventId.cs" />
     <Compile Include="Constants\PosChangeEnum.cs" />
     <Compile Include="Constants\Resources.cs" />
     <Compile Include="Exceptions\PurchasedItemsFullException.cs" />
@@ -93,6 +94,7 @@
     <Compile Include="Models\AuctionDetails.cs" />
     <Compile Include="Models\AuctionDuration.cs" />
     <Compile Include="Models\AuctionInfo.cs" />
+    <Compile Include="Models\PinResponse.cs" />
     <Compile Include="Models\StoreResponse.cs" />
     <Compile Include="Models\AuctionResponse.cs" />
     <Compile Include="Models\Auth.cs" />
@@ -183,6 +185,7 @@
     <Compile Include="Requests\DefinitionRequest.cs" />
     <Compile Include="Requests\GiftRequest.cs" />
     <Compile Include="Requests\PackRequest.cs" />
+    <Compile Include="Requests\PinRequest.cs" />
     <Compile Include="Requests\StoreRequest.cs" />
     <Compile Include="Requests\ListGiftsRequest.cs" />
     <Compile Include="Requests\LoginMobileRequest.cs" />

@@ -17,6 +17,7 @@ namespace UltimateTeam.Toolkit.Requests
         private readonly LoginDetails _loginDetails;
         private readonly ITwoFactorCodeProvider _twoFactorCodeProvider;
         private IHasher _hasher;
+        private Func<PinEventId, IFutRequest<PinResponse>> _pinEventRequestFactory;
 
         private static readonly Random Random = new Random();
         private readonly string _machineKey = GetRandomHexNumber(16);
@@ -32,11 +33,12 @@ namespace UltimateTeam.Toolkit.Requests
             set { _hasher = value; }
         }
 
-        public LoginRequestMobile(LoginDetails loginDetails, ITwoFactorCodeProvider twoFactorCodeProvider)
+        public LoginRequestMobile(LoginDetails loginDetails, ITwoFactorCodeProvider twoFactorCodeProvider, Func<PinEventId, IFutRequest<PinResponse>> pinEventRequestFactory)
         {
             loginDetails.ThrowIfNullArgument();
             _loginDetails = loginDetails;
             _twoFactorCodeProvider = twoFactorCodeProvider;
+            _pinEventRequestFactory = pinEventRequestFactory;
         }
 
         public void SetCookieContainer(CookieContainer cookieContainer)
@@ -48,11 +50,21 @@ namespace UltimateTeam.Toolkit.Requests
         {
             try
             {
+                if (_loginDetails.SendPinRequests == true)
+                {
+                    var pinResponseCompanionAppAppOpened = await _pinEventRequestFactory(PinEventId.CompanionApp_AppOpened).PerformRequestAsync();
+                }
+
                 var mainPageResponseMessage = await GetMainPageAsync().ConfigureAwait(false);
                 await LoginAsync(_loginDetails, mainPageResponseMessage);
                 var authToken = await GetAuthTokenAsync(_code);
                 var pid = await GetMobilePidAsync(authToken.Access_Token);
                 _nucUserId = pid.Pid.ExternalRefValue;
+
+                if (_loginDetails.SendPinRequests == true)
+                {
+                    var pinResponseCompanionAppConnect = await _pinEventRequestFactory(PinEventId.CompanionApp_Connect).PerformRequestAsync();
+                }
 
                 var sessionCode = await GetMobileAuthCodeAsync(authToken.Access_Token);              
                 try
@@ -73,6 +85,11 @@ namespace UltimateTeam.Toolkit.Requests
                 _sessionId = sessionId.Sid;
 
                 var phishingToken = await ValidateAsync(_loginDetails);
+
+                if (_loginDetails.SendPinRequests == true)
+                {
+                    var pinResponseCompanionAppConnected = await _pinEventRequestFactory(PinEventId.CompanionApp_Connected).PerformRequestAsync();
+                }
 
                 return new LoginResponse(_nucUserId, shards, userAccounts, _sessionId, phishingToken, _nucPersonaId);
             }
