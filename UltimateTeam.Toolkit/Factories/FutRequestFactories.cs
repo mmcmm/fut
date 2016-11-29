@@ -28,6 +28,8 @@ namespace UltimateTeam.Toolkit.Factories
 
         private AppVersion _appVersion;
 
+        private Platform _platform;
+
         private IHttpClient _httpClient;
 
         private uint _pinRequestsCount = 0;
@@ -210,6 +212,7 @@ namespace UltimateTeam.Toolkit.Factories
                 return _loginRequestFactory ?? (_loginRequestFactory = (details, twoFactorCodeProvider) =>
                 {
                     _appVersion = details.AppVersion;
+                    _platform = details.Platform;
 
                     if (details.SendPinRequests == true)
                     {
@@ -239,7 +242,7 @@ namespace UltimateTeam.Toolkit.Factories
                     }
                     else if (details.AppVersion == AppVersion.CompanionApp)
                     {
-                        var loginRequest = new LoginRequestMobile(details, twoFactorCodeProvider, _sendPinRequestRequestFactory) { HttpClient = HttpClient, Resources = _mobileResources };
+                        var loginRequest = new LoginRequestMobile(details, twoFactorCodeProvider, SendPinRequestFactory) { HttpClient = HttpClient, Resources = _mobileResources };
                         _resources = _mobileResources;
                         loginRequest.SetCookieContainer(CookieContainer);
                         return loginRequest;
@@ -739,7 +742,7 @@ namespace UltimateTeam.Toolkit.Factories
                 return _sendPinRequestRequestFactory ?? (_sendPinRequestRequestFactory = (pinEventId) =>
                 {
                     _pinRequestsCount++;
-                    var sendPinRequest = SetSharedRequestProperties(new PinEventRequest(_appVersion, _sessionId, _nucleusId, _personaId, pinEventId, _lastPinEventId, _pinRequestsCount));
+                    var sendPinRequest = SetSharedRequestProperties(new PinEventRequest(_appVersion, _sessionId, _nucleusId, _personaId, pinEventId, _lastPinEventId, _pinRequestsCount, _platform));
                     _lastPinEventId = pinEventId;
                     return sendPinRequest;
                 });

@@ -108,7 +108,7 @@ namespace UltimateTeam.Toolkit
 
                 if (_loginDetails.SendPinRequests == true)
                 {
-                    var pinResponseTransferMarketSearchResults = await _requestFactories.SendPinRequestFactory(PinEventId.WebApp_TransferMarketSearchResults).PerformRequestAsync();
+                    var pinResponseTransferMarketSearchResults = await _requestFactories.SendPinRequestFactory(PinEventId.CompanionApp_TransferMarketResults).PerformRequestAsync();
                 }
                 return searchResponse;
             }
