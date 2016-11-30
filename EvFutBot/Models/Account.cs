@@ -788,12 +788,11 @@ namespace EvFutBot.Models
                 return false;
             }
 
-            string[] qsTypes = { "kit", "custom" };
             foreach (var purchasedCard in unassignedList.ItemData)
             {
                 try
                 {
-                    if (qsTypes.Contains(purchasedCard.ItemType))
+                    if (purchasedCard.ItemType != "player")
                     {
                         await Task.Delay(settings.RmpDelayLow);
                         await _utClient.QuickSellItemAsync(purchasedCard.Id);
