@@ -333,7 +333,7 @@ namespace EvFutBot
                     break;
                 }
 
-                return working >= total/2;
+                return working >= total*0.75;
             }
         }
 
@@ -411,6 +411,18 @@ namespace EvFutBot
                 cmd.Prepare();
                 cmd.Parameters.AddWithValue("@price", price);
                 cmd.Parameters.AddWithValue("@asset_id", assetId);
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        public static void UpdatePanelToStopped()
+        {
+            using (var connection = new MySqlConnection(Cs.GetConnectionString(true)))
+            using (var cmd = connection.CreateCommand())
+            {
+                connection.Open();
+
+                cmd.CommandText = "UPDATE panel SET status='Stopped';";
                 cmd.ExecuteNonQuery();
             }
         }

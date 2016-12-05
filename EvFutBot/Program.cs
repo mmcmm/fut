@@ -19,7 +19,7 @@ namespace EvFutBot
     {
         private static IScheduler _scheduler;
         private static List<Account> _accountsInWork;
-        public static string Signature = "D"; // we use to make all servers updated
+        public static string Signature = "E"; // we use to make all servers updated
         public static string DevMachine = "DESKTOP-3A254DD";
         public static string WorkMachine = "WIN-76FUKLJMOIP";
 
@@ -30,6 +30,7 @@ namespace EvFutBot
 //                InitUpdateBaseIds();
 //                InitStatistics();
 //                InitEvoCustomerCards();
+//                InitMmogaCustomerCards();
                 InitAccounts(AppVersion.WebApp);
             }
             else
@@ -39,7 +40,7 @@ namespace EvFutBot
                     _scheduler = new StdSchedulerFactory(new NameValueCollection
                     {
                         {"quartz.scheduler.instanceName", "MainScheduler"},
-                        {"quartz.threadPool.threadCount", "6"}, // change when adding jobs
+                        {"quartz.threadPool.threadCount", "7"}, // change when adding jobs
                         {"quartz.jobStore.type", "Quartz.Simpl.RAMJobStore, Quartz"}
                     }).GetScheduler();
                     _scheduler.Start();
@@ -68,6 +69,10 @@ namespace EvFutBot
                         .WithIdentity("resetcardsperhourjob", "group1")
                         .Build();
 
+                    var mmogaaddcardsjob = JobBuilder.Create<MmogaAddCardsJob>()
+                        .WithIdentity("mmogaaddcardsjob", "group1")
+                        .Build();
+
                     var webapptrigger = TriggerBuilder.Create()
                         .WithIdentity("webapptrigger", "group1")
                         .WithSchedule(CronScheduleBuilder
@@ -85,7 +90,7 @@ namespace EvFutBot
                     var closeapptrigger = TriggerBuilder.Create()
                         .WithIdentity("closeapptrigger", "group1")
                         .WithSchedule(CronScheduleBuilder
-                            .DailyAtHourAndMinute(06, 15) // 06, 15 - 24 hours format 
+                            .DailyAtHourAndMinute(06, 14) // 06, 14 - 24 hours format 
                             .InTimeZone(TimeZoneInfo.FindSystemTimeZoneById("GMT Standard Time")))
                         .Build();
 
@@ -110,12 +115,20 @@ namespace EvFutBot
                             .RepeatForever())
                         .Build();
 
+                    var mmogaaddcardstrigger = TriggerBuilder.Create()
+                        .WithIdentity("mmogaaddcardstrigger", "group1")
+                        .WithSchedule(CronScheduleBuilder
+                            .DailyAtHourAndMinute(09, 30) // 09, 30 - 24 hours format
+                            .InTimeZone(TimeZoneInfo.FindSystemTimeZoneById("GMT Standard Time")))
+                        .Build();
+
                     _scheduler.ScheduleJob(webappjob, webapptrigger);
                     _scheduler.ScheduleJob(mobilejob, mobiletrigger);
                     _scheduler.ScheduleJob(closeappjob, closeapptrigger);
                     _scheduler.ScheduleJob(evoaddcardsjob, evoaddcardstrigger);
                     _scheduler.ScheduleJob(statisticsjob, statisticstrigger);
                     _scheduler.ScheduleJob(resetcardsperhourjob, resetcardsperhourtrigger);
+//                    _scheduler.ScheduleJob(mmogaaddcardsjob, mmogaaddcardstrigger);
                 }
                 catch (SchedulerException ex)
                 {
@@ -289,6 +302,20 @@ namespace EvFutBot
             Task.WaitAll(taskList.ToArray());
         }
 
+        private static void InitMmogaCustomerCards()
+        {
+            if (!DevOrWork()) return;
+            if (Database.Tunnel == null) Database.SshConnect();
+
+            var taskList = new List<Task>();
+            var accountTask = new Task<bool>(() =>
+                MmogaCustomer.AddCardsToBuy().Result);
+
+            accountTask.Start();
+            taskList.Add(accountTask);
+            Task.WaitAll(taskList.ToArray());
+        }
+
         private static void InitStatistics()
         {
             if (!DevOrWork()) return;
@@ -366,6 +393,15 @@ namespace EvFutBot
         {
             public void Execute(IJobExecutionContext context)
             {
+                try
+                {
+                    Database.UpdatePanelToStopped();
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogException(ex.Message, ex.ToString());
+                }
+
                 _scheduler.Shutdown();
             }
         }
@@ -392,6 +428,21 @@ namespace EvFutBot
                 try
                 {
                     InitEvoCustomerCards();
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogException(ex.Message, ex.ToString());
+                }
+            }
+        }
+
+        public class MmogaAddCardsJob : IJob
+        {
+            public void Execute(IJobExecutionContext context)
+            {
+                try
+                {
+                    InitMmogaCustomerCards();
                 }
                 catch (Exception ex)
                 {

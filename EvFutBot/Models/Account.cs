@@ -260,7 +260,9 @@ namespace EvFutBot.Models
                         Credits = await ClearTradePile(settings, _startedAt);
                         Update(panel, Credits, Panel.Statuses.Working, settings.RmpDelay);
 
-                        players = GetPotentialPlayers(settings.Batch, settings.MaxCardCost); // new players
+                        var batch = settings.Batch;
+                        if (Platform == Platform.Xbox360) batch = settings.Batch/2; // lower for 360
+                        players = GetPotentialPlayers(batch, settings.MaxCardCost); // new players
                         while (players.Count == 0) // a fail safe
                         {
                             if (Database.Tunnel == null) Database.SshConnect();

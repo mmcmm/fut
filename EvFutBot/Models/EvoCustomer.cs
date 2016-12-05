@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 using EvFutBot.Utilities;
@@ -92,7 +93,7 @@ namespace EvFutBot.Models
             await CompleteOrder(platform, order);
         }
 
-        private static uint GetPlatformStock(Platform platform)
+        public static uint GetPlatformStock(Platform platform)
         {
             try
             {
@@ -251,7 +252,7 @@ namespace EvFutBot.Models
             }
         }
 
-        private static void AddCard(Platform platform, OrderCard card, Account.CardStatuses status, uint item)
+        public static void AddCard(Platform platform, OrderCard card, Account.CardStatuses status, uint item)
         {
             try
             {
@@ -359,7 +360,7 @@ namespace EvFutBot.Models
             string path = $"/evoctrl/api/check/?key={Apikey}";
             try
             {
-                var json = await Get(path);
+                var json = await Get(path, BaseUri);
                 return json.Length != 0 && json != "[]"
                     ? JsonConvert.DeserializeObject<Demand>(json)
                     : null;
@@ -389,7 +390,7 @@ namespace EvFutBot.Models
 
             try
             {
-                var json = await Post(path, data);
+                var json = await Post(path, data, BaseUri);
                 return json.Length != 0 && json != "[]"
                     ? JsonConvert.DeserializeObject<IEnumerable<OrderCard>>(json)
                     : null;
@@ -420,7 +421,7 @@ namespace EvFutBot.Models
 
             try
             {
-                await Post(path, data);
+                await Post(path, data, BaseUri);
             }
             catch (Exception ex)
             {
@@ -449,7 +450,7 @@ namespace EvFutBot.Models
             try
             {
                 byte i = 0;
-                var result = await Post(path, data);
+                var result = await Post(path, data, BaseUri);
                 while (result != "Successfully Submitted") // we try 6 times
                 {
                     if (i == 6) break;
@@ -463,7 +464,7 @@ namespace EvFutBot.Models
                         new KeyValuePair<string, string>("paymentEmail", "prowholesale@outlook.com"),
                         new KeyValuePair<string, string>("paymentMethod", "P")
                     });
-                    result = await Post(path, data);
+                    result = await Post(path, data, BaseUri);
                     i++;
                 }
 
@@ -478,12 +479,12 @@ namespace EvFutBot.Models
             }
         }
 
-        private static async Task<string> Get(string path)
+        private static async Task<string> Get(string path, string baseUri)
         {
             using (var handler = new HttpClientHandler())
             using (var httpClient = new HttpClient(handler))
             {
-                httpClient.BaseAddress = new Uri(BaseUri);
+                httpClient.BaseAddress = new Uri(baseUri);
                 var result = await httpClient.GetAsync(path);
                 result.EnsureSuccessStatusCode();
 
@@ -491,12 +492,13 @@ namespace EvFutBot.Models
             }
         }
 
-        private static async Task<string> Post(string path, FormUrlEncodedContent data)
+
+        public static async Task<string> Post(string path, FormUrlEncodedContent data, string baseUri)
         {
             using (var handler = new HttpClientHandler())
             using (var httpClient = new HttpClient(handler))
             {
-                httpClient.BaseAddress = new Uri(BaseUri);
+                httpClient.BaseAddress = new Uri(baseUri);
                 var result = await httpClient.PostAsync(path, data).ConfigureAwait(false);
                 result.EnsureSuccessStatusCode();
 

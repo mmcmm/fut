@@ -83,6 +83,7 @@
     <Compile Include="Models\Account.List.cs" />
     <Compile Include="Models\Account.Prices.cs" />
     <Compile Include="Models\EvoCustomer.cs" />
+    <Compile Include="Models\MmogaCustomer.cs" />
     <Compile Include="Services\FutBin.cs" />
     <Compile Include="Models\Panel.cs" />
     <Compile Include="Models\Player.cs" />
@@ -94,6 +95,7 @@
     <Compile Include="Utilities\CookieUtil.cs" />
     <Compile Include="Utilities\EvoCustomerRequests.cs" />
     <Compile Include="Utilities\Logger.cs" />
+    <Compile Include="Utilities\MmogaCustomerRequests.cs" />
     <Compile Include="Utilities\PlayersDatabaseRequest.cs" />
     <Compile Include="Utilities\PlayersSearchRequest.cs" />
     <Compile Include="Utilities\ssh.cs" />
