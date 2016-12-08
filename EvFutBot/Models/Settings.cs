@@ -29,7 +29,7 @@ namespace EvFutBot.Models
                 throw new ArgumentOutOfRangeException(nameof(rpmDelay), "RPM Delay to small");
 
             _rpmDelayRange = rpmDelay;
-            PreBidDelay = 2*1000; // 2 seconds
+            PreBidDelay = 0; // 2 seconds
             RunforHours = _rand.Next(runforHours[0], runforHours[1]);
             _rmpDelayPrices = Convert.ToInt32(60/((decimal) 4900/RunforHours/60)*1000); // 5000 request limit per day
         }
