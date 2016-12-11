@@ -19,7 +19,7 @@ namespace EvFutBot
     {
         private static IScheduler _scheduler;
         private static List<Account> _accountsInWork;
-        public static string Signature = "A"; // we use to make all servers updated
+        public static string Signature = "B"; // we use to make all servers updated
         public static string DevMachine = "DESKTOP-3A254DD";
         public static string WorkMachine = "WIN-76FUKLJMOIP";
 
@@ -76,7 +76,7 @@ namespace EvFutBot
                     var webapptrigger = TriggerBuilder.Create()
                         .WithIdentity("webapptrigger", "group1")
                         .WithSchedule(CronScheduleBuilder
-                            .DailyAtHourAndMinute(11, 40) // 07, 30 - 24 hours format
+                            .DailyAtHourAndMinute(07, 30) // 07, 30 - 24 hours format
                             .InTimeZone(TimeZoneInfo.FindSystemTimeZoneById("GMT Standard Time")))
                         .Build();
 
@@ -128,7 +128,7 @@ namespace EvFutBot
 //                    _scheduler.ScheduleJob(evoaddcardsjob, evoaddcardstrigger);
                     _scheduler.ScheduleJob(statisticsjob, statisticstrigger);
                     _scheduler.ScheduleJob(resetcardsperhourjob, resetcardsperhourtrigger);
-//                    _scheduler.ScheduleJob(mmogaaddcardsjob, mmogaaddcardstrigger);
+                    _scheduler.ScheduleJob(mmogaaddcardsjob, mmogaaddcardstrigger);
                 }
                 catch (SchedulerException ex)
                 {
