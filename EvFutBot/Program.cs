@@ -19,7 +19,7 @@ namespace EvFutBot
     {
         private static IScheduler _scheduler;
         private static List<Account> _accountsInWork;
-        public static string Signature = "E"; // we use to make all servers updated
+        public static string Signature = "F"; // we use to make all servers updated
         public static string DevMachine = "DESKTOP-3A254DD";
         public static string WorkMachine = "WIN-76FUKLJMOIP";
 
@@ -128,7 +128,7 @@ namespace EvFutBot
 //                    _scheduler.ScheduleJob(evoaddcardsjob, evoaddcardstrigger);
                     _scheduler.ScheduleJob(statisticsjob, statisticstrigger);
                     _scheduler.ScheduleJob(resetcardsperhourjob, resetcardsperhourtrigger);
-                    _scheduler.ScheduleJob(mmogaaddcardsjob, mmogaaddcardstrigger);
+//                    _scheduler.ScheduleJob(mmogaaddcardsjob, mmogaaddcardstrigger);
                 }
                 catch (SchedulerException ex)
                 {
