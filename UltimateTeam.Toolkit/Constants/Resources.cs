@@ -32,6 +32,8 @@ namespace UltimateTeam.Toolkit.Constants
 
         public const string AuthXbox = "https://utas.external.s3.fut.ea.com/ut/auth?timestamp={0}";
 
+        public const string MobilePlatform = "FUT17AND";
+
         public const string AccountInfoXbox = "https://utas.external.s3.fut.ea.com/ut/game/fifa17/user/accountinfo?sku=FUT17AND&_={0}";
 
         public const string POWAuth = "https://pas.mob.v1.easfc.ea.com:8095/pow/auth?timestamp={0}";

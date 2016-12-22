@@ -31,7 +31,7 @@ namespace EvFutBot
 //                InitStatistics();
 //                InitEvoCustomerCards();
 //                InitMmogaCustomerCards();
-                InitAccounts(AppVersion.WebApp);
+                InitAccounts(AppVersion.CompanionApp);
             }
             else
             {
