@@ -18,7 +18,7 @@ namespace EvFutBot.Models
         private const string User = "msltdx0";
         private const string Key = "oongohR!ooY0aipaeKeg";
         private const string BaseUri = "https://www.mmoga.com";
-        private const string PaymentEmail = "nicoleta8905@gmail.com";
+        private const string PaymentEmail = "msltdx0@gmail.com";
         private const string PaymentCurrency = "USD";
         private const uint CoinAmount = 50000;
         private const string PaymentGateway = "skrill";
@@ -26,7 +26,6 @@ namespace EvFutBot.Models
         private const uint ItemId = 5097193;
 
         private static readonly Random Rand = new Random();
-        private static readonly Encoding Encoding = Encoding.UTF8;
 
         public static Task<bool> AddCardsToBuy()
         {
