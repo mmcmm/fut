@@ -19,7 +19,7 @@ namespace EvFutBot
     {
         private static IScheduler _scheduler;
         private static List<Account> _accountsInWork;
-        public static string Signature = "A"; // we use to make all servers updated
+        public static string Signature = "B"; // we use to make all servers updated
         public static string DevMachine = "DESKTOP-3A254DD";
         public static string WorkMachine = "WIN-76FUKLJMOIP";
 
@@ -117,9 +117,9 @@ namespace EvFutBot
 
                     var mmogaaddcardstrigger = TriggerBuilder.Create()
                         .WithIdentity("mmogaaddcardstrigger", "group1")
-                        .WithSchedule(CronScheduleBuilder
-                            .DailyAtHourAndMinute(09, 30) // 09, 30 - 24 hours format
-                            .InTimeZone(TimeZoneInfo.FindSystemTimeZoneById("GMT Standard Time")))
+                        .WithSimpleSchedule(x => x
+                            .WithIntervalInMinutes(1) // every 1 min
+                            .RepeatForever())
                         .Build();
 
                     _scheduler.ScheduleJob(webappjob, webapptrigger);

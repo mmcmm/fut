@@ -22,28 +22,16 @@ namespace EvFutBot.Models
         private const string PaymentCurrency = "USD";
         private const uint CoinAmount = 50000;
         private const string PaymentGateway = "skrill";
-        private const uint MaxSell = 100; // we don't want to expose to much
         private const uint ItemId = 5097193;
-
-        private static readonly Random Rand = new Random();
 
         public static Task<bool> AddCardsToBuy()
         {
             return Task.Run(async () =>
             {
-                uint i = 0;
-                while (true)
+                var trade = await CheckXb360Demand();
+                if (trade?.Code == 200)
                 {
-                    var trade = await CheckXb360Demand();
-                    if (trade?.Code == 200)
-                    {
-                        ProcessDemand(Platform.Xbox360, trade);
-                        i++;
-                    }
-
-                    // delay between calls
-                    await Task.Delay(Rand.Next(30, 90)*1000);
-                    if (i >= MaxSell) break;
+                    ProcessDemand(Platform.Xbox360, trade);
                 }
 
                 return true;
