@@ -20,7 +20,7 @@ namespace EvFutBot.Models
         private const string BaseUri = "https://www.mmoga.com";
         private const string PaymentEmail = "msltdx0@gmail.com";
         private const string PaymentCurrency = "USD";
-        private const uint CoinAmount = 50000;
+        private const uint CoinAmount = 100000;
         private const string PaymentGateway = "skrill";
         private const uint ItemId = 5097193;
 
