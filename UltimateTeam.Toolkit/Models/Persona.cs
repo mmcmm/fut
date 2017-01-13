@@ -14,6 +14,8 @@ namespace UltimateTeam.Toolkit.Models
 
         public bool Trial { get; set; }
 
+        public bool TrialFree { get; set; }
+
         public string UserState { get; set; }
     }
 }
